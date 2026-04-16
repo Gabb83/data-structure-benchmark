@@ -1,65 +1,106 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
+import Button from "@/src/components/Button";
 
 export default function Home() {
+  const [estrutura, setEstrutura] = useState<string | null>(null);
+  const [volume, setVolume] = useState<string | null>(null);
+  const [operacao, setOperacao] = useState<string | null>(null);
+
+  const estruturas = ["array", "hashmap", "árvore binária", "árvore avl", "map", "set"];
+  const volumes = ["Pequeno | 10k", "Médio | 50k", "Grande | 100k"];
+  const operacoes = ["Busca", "Ordenação", "Filtrar"];
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div>
+      <div className="bg-[#222222] text-[#ffffff] pt-2 mb-6 p-3">
+        <p className="text-[18px] font-semibold">Data Structure Benchmark — MVP</p>
+        <p>ambiente de teste * Next.js | TypeScript</p>
+      </div>
+      <div className="grid grid-cols-2 gap-5 px-5">
+        <div>
+          <div>
+            <p>Estrutura de dados:</p>
+            <div className="flex flex-row gap-2">
+              {
+                estruturas.map((item) => (
+                   <Button
+                    key={item}
+                    nome={item}
+                    selecionado={estrutura === item}
+                    onClick={() => setEstrutura(item)}
+                  />
+                ))
+              }
+            </div>
+          </div>
+          <div className="pt-4">
+            <p>Volume de dados:</p>
+            <div className="flex flex-row gap-2">
+              {
+                volumes.map((item) => (
+                   <Button
+                    key={item}
+                    nome={item}
+                    selecionado={volume === item}
+                    onClick={() => setVolume(item)}
+                  />
+                ))
+              }
+            </div>
+          </div>
+          <div className="pt-4">
+            <p>Operações:</p>
+            <div className="flex flex-row gap-3">
+              {
+                operacoes.map((item) => (
+                   <Button
+                    key={item}
+                    nome={item}
+                    selecionado={operacao === item}
+                    onClick={() => setOperacao(item)}
+                  />
+                ))
+              }
+            <button className="border rounded-sm cursor-pointer p-1 ml-20">Executar</button>
+            </div>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        <div>
+          <div>
+            <p>Métricas — Última execução:</p>
+            <div className="flex flex-row gap-2">
+              <div className="bg-zinc-50 w-[250px] h-[150px] border rounded-md p-1">
+                <p>tempo de resposta:</p>
+              </div>
+               <div className="bg-zinc-50 w-[250px] h-[150px] border rounded-md p-1">
+                <p>tempo de renderização:</p>
+              </div>
+               <div className="bg-zinc-50 w-[250px] h-[150px] border rounded-md p-1">
+                <p>taxa de quadros FPS:</p>
+              </div>
+            </div>
+          </div>
         </div>
-      </main>
+      </div>   
+
+      <div className="grid grid-cols-2 pt-10 px-5">
+        <div>
+          <p>Lista de Resultado</p>
+        </div>
+        <div>
+          <p>Logs de Execução</p>
+           <div className="bg-zinc-100 w-full h-[120px] border rounded-md p-3">
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris pulvinar arcu eget purus viverra pellentesque. Sed et consequat risus, eget gravida lectus. Nulla mattis pellentesque aliquet.</p>
+          </div>
+          <div className="flex flex-row gap-10 py-4">
+            <p>Estrutura: </p>
+            <p>Volume: </p>
+            <p>Repetições: </p>
+          </div>
+        </div>
+      </div>   
     </div>
   );
 }
