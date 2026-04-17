@@ -1,16 +1,83 @@
 "use client";
 
-import { useState } from "react";
+import { Profiler, ProfilerOnRenderCallback, useMemo, useState } from "react";
 import Button from "@/src/components/Button";
+import { geracaoDeDados, Registro } from "@/src/utils/generateData";
 
 export default function Home() {
   const [estrutura, setEstrutura] = useState<string | null>(null);
   const [volume, setVolume] = useState<string | null>(null);
   const [operacao, setOperacao] = useState<string | null>(null);
 
+  const [tempoDeResposta, setTempoDeResposta] = useState<string>("0 ms");
+  const [tempoRenderizacaoo, setTempoRenderizacao] = useState<string>("0 ms");
+  const [logs, setLogs] = useState<string>("");
+  const [resultados, setResultados] = useState<Registro[]>([]);
+
   const estruturas = ["array", "hashmap", "árvore binária", "árvore avl", "map", "set"];
   const volumes = ["Pequeno | 10k", "Médio | 50k", "Grande | 100k"];
   const operacoes = ["Busca", "Ordenação", "Filtrar"];
+
+  const volumeNumerico = useMemo(() => {
+    if (volume?.includes("10k")) return 10000;
+    if (volume?.includes("50k")) return 50000;
+    if (volume?.includes("100k")) return 100000;
+    return 0;
+  }, [volume]);
+
+  const dadosMestre = useMemo(() => {
+    if (volumeNumerico === 0) return [];
+    return geracaoDeDados(volumeNumerico);
+  }, [volumeNumerico]);
+
+  const executarBenchmark = () => {
+    if (!estrutura || !operacao || volumeNumerico === 0) {
+      alert("Selecione estrutura, volume e operação!");
+      return;
+    }
+
+    const copiaTeste = [...dadosMestre];
+    let res: Registro[] = [];
+    
+    const t0 = performance.now();
+
+    if (estrutura === "array") {
+      if (operacao === "Ordenação") {
+        res = copiaTeste.sort((a, b) => a.preco - b.preco);
+      } else if (operacao === "Filtrar") {
+        res = copiaTeste.filter(item => item.preco < 100);
+      } else if (operacao === "Busca") {
+        const item = copiaTeste.find(i => i.idx === volumeNumerico - 1);
+        res = item ? [item] : [];
+      }
+    }
+
+    const t1 = performance.now();
+    
+    // Atualização das métricas
+    setTempoDeResposta(`${(t1 - t0).toFixed(4)} ms`);
+    setResultados(res.slice(0, 100));
+    setLogs(`Sucesso: ${estrutura} processou ${volumeNumerico} registros em modo ${operacao}.`);
+  };
+
+  const renderizacao: ProfilerOnRenderCallback = (
+    id,
+    phase,
+    actualDuration
+  ) => {
+    if (phase === "update") {
+      setTempoRenderizacao(`${actualDuration.toFixed(4)} ms`);
+    }
+  };
+
+  const zerarAmbiente = () => {
+    setEstrutura(null);
+    setVolume(null);
+    setOperacao(null);
+    setTempoDeResposta("0 ms");
+    setLogs("Ambiente reiniciado.");
+    setResultados([]);
+  };
 
   return (
     <div>
@@ -63,22 +130,26 @@ export default function Home() {
                   />
                 ))
               }
-            <button className="border rounded-sm cursor-pointer p-1 ml-20">Executar</button>
+              <button onClick={executarBenchmark} className="border rounded-sm cursor-pointer p-1 ml-20">Executar</button>
+              <button onClick={zerarAmbiente} className="border rounded-sm cursor-pointer p-1 ml-20">Zerar</button>
             </div>
           </div>
         </div>
+        
         <div>
           <div>
             <p>Métricas — Última execução:</p>
             <div className="flex flex-row gap-2">
               <div className="bg-zinc-50 w-[250px] h-[150px] border rounded-md p-1">
-                <p>tempo de resposta:</p>
+                <p className="text-sm text-zinc-500">tempo de resposta:</p>
+                <p className="text-xl font-bold">{tempoDeResposta}</p>
               </div>
-               <div className="bg-zinc-50 w-[250px] h-[150px] border rounded-md p-1">
-                <p>tempo de renderização:</p>
+              <div className="bg-zinc-50 w-[250px] h-[150px] border rounded-md p-1">
+                <p className="text-sm text-zinc-500">tempo de renderização:</p>
+                <p className="text-xl font-bold">{tempoRenderizacaoo}</p>
               </div>
-               <div className="bg-zinc-50 w-[250px] h-[150px] border rounded-md p-1">
-                <p>taxa de quadros FPS:</p>
+              <div className="bg-zinc-50 w-[250px] h-[150px] border rounded-md p-1">
+                <p className="text-sm text-zinc-500">taxa de quadros FPS:</p>
               </div>
             </div>
           </div>
@@ -87,20 +158,22 @@ export default function Home() {
 
       <div className="grid grid-cols-2 pt-10 px-5">
         <div>
-          <p>Lista de Resultado</p>
+          <p className="font-bold mb-2">Lista de Resultado</p>
+          <Profiler id="ListaResultados" onRender={renderizacao}>
+            <div className="bg-white border rounded-md h-[300px] overflow-y-auto p-2">
+              {resultados.length === 0 ? (
+                <p className="text-gray-400 text-sm">Nenhum dado processado.</p>
+              ) : (
+                resultados.map((item) => (
+                  <div key={item.idx} className="text-[10px] border-b border-zinc-100 py-1">
+                    {item.idx} | {item.nome} | R$ {item.preco.toFixed(2)}
+                  </div>
+                ))
+              )}
+            </div>
+          </Profiler>
         </div>
-        <div>
-          <p>Logs de Execução</p>
-           <div className="bg-zinc-100 w-full h-[120px] border rounded-md p-3">
-            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris pulvinar arcu eget purus viverra pellentesque. Sed et consequat risus, eget gravida lectus. Nulla mattis pellentesque aliquet.</p>
-          </div>
-          <div className="flex flex-row gap-10 py-4">
-            <p>Estrutura: </p>
-            <p>Volume: </p>
-            <p>Repetições: </p>
-          </div>
-        </div>
-      </div>   
+      </div> 
     </div>
   );
 }
