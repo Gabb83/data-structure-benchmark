@@ -44,19 +44,13 @@ export default function Home() {
     if (estrutura === "array") {
       if (operacao === "Ordenação") {
         res = copiaTeste.sort((a, b) => a.preco - b.preco);
-      } else if (operacao === "Filtrar") {
-        res = copiaTeste.filter(item => item.preco < 100);
-      } else if (operacao === "Busca") {
-        const item = copiaTeste.find(i => i.idx === volumeNumerico - 1);
-        res = item ? [item] : [];
       }
     }
 
     const t1 = performance.now();
     
-    // Atualização das métricas
     setTempoDeResposta(`${(t1 - t0).toFixed(4)} ms`);
-    setResultados(res.slice(0, 100));
+    setResultados(res.slice(0, volumeNumerico));
     setLogs(`Sucesso: ${estrutura} processou ${volumeNumerico} registros em modo ${operacao}.`);
   };
 
@@ -75,12 +69,13 @@ export default function Home() {
     setVolume(null);
     setOperacao(null);
     setTempoDeResposta("0 ms");
+    setTempoRenderizacao("0 ms");
     setLogs("Ambiente reiniciado.");
     setResultados([]);
   };
 
   return (
-    <div>
+    <div className="">
       <div className="bg-[#222222] text-[#ffffff] pt-2 mb-6 p-3">
         <p className="text-[18px] font-semibold">Data Structure Benchmark — MVP</p>
         <p>ambiente de teste * Next.js | TypeScript</p>
@@ -160,13 +155,16 @@ export default function Home() {
         <div>
           <p className="font-bold mb-2">Lista de Resultado</p>
           <Profiler id="ListaResultados" onRender={renderizacao}>
-            <div className="bg-white border rounded-md h-[300px] overflow-y-auto p-2">
+            <div className="bg-white border rounded-md h-[220px] overflow-y-auto p-2">
+              <div className="text-[14px] border-b border-zinc-100 py-1">
+                <p>idx | nome | categoria | item | quantidade | preço</p>
+              </div>
               {resultados.length === 0 ? (
                 <p className="text-gray-400 text-sm">Nenhum dado processado.</p>
               ) : (
                 resultados.map((item) => (
-                  <div key={item.idx} className="text-[10px] border-b border-zinc-100 py-1">
-                    {item.idx} | {item.nome} | R$ {item.preco.toFixed(2)}
+                  <div key={item.idx} className="text-[12px] border-b border-zinc-100 py-1">
+                    {item.idx} | {item.nome} | {item.categoria} | {item.quantidade} | R$ {item.preco.toFixed(2)}
                   </div>
                 ))
               )}
