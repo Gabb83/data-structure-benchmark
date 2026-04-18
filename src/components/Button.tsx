@@ -11,8 +11,8 @@ export default function Button({
     <div>
       <button
         onClick={onClick}
-        className={`px-3 py-1 rounded-md border cursor-pointer
-        ${selecionado ? "bg-[#222222] text-white" : "bg-zinc-50 text-black"}
+        className={`w-full px-4 py-1.5 rounded-md border cursor-pointer 
+        ${selecionado ? "bg-[#353535] text-white" : "bg-zinc-50 text-black hover:bg-zinc-200 transition ease-in-out duration-300"}
       `}
       >
         {nome}
