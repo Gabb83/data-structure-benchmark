@@ -1,9 +1,9 @@
 "use client";
 
 import { Profiler, ProfilerOnRenderCallback, useMemo, useState } from "react";
+import { ChartBar, Play, RotateCcw, Clock } from "lucide-react";
 import Button from "@/src/components/Button";
 import { geracaoDeDados, Registro } from "@/src/utils/generateData";
-import { ChartBar, Play, RotateCcw, Clock } from "lucide-react";
 
 type HistoricoEntry = {
   estrutura: string;
@@ -54,6 +54,14 @@ export default function Home() {
     if (estrutura === "array") {
       if (operacao === "Ordenação") {
         res = copiaTeste.sort((a, b) => a.preco - b.preco);
+      }
+    }
+
+    if (estrutura === "map") {
+      if (operacao === "Ordenação") {
+        const mapa = new Map<number, Registro>();
+        copiaTeste.forEach((item) => mapa.set(item.idx, item));
+        res = [...mapa.values()].sort((a, b) => a.preco - b.preco);
       }
     }
 
@@ -154,11 +162,11 @@ export default function Home() {
           <p className="text-zinc-700 font-semibold mb-2">Métricas — Última execução:</p>
           <div className="flex flex-row gap-2">
             <div className="bg-zinc-50 w-[250px] h-[150px] border border-[2px] border-[#E5E7EB] rounded-md p-1">
-              <p className="text-sm text-zinc-500">⏱ | tempo de resposta:</p>
+              <p className="text-sm text-zinc-500">tempo de resposta:</p>
               <p className="text-xl text-zinc-700 font-bold">{tempoDeResposta}</p>
             </div>
             <div className="bg-zinc-50 w-[250px] h-[150px] border border-[2px] border-[#E5E7EB] rounded-md p-1">
-              <p className="text-sm text-zinc-500">🖥 | tempo de renderização:</p>
+              <p className="text-sm text-zinc-500">tempo de renderização:</p>
               <p className="text-xl text-zinc-700 font-bold">{tempoRenderizacao}</p>
             </div>
             <div className="bg-zinc-50 w-[250px] h-[150px] border border-[2px] border-[#E5E7EB] rounded-md p-1">
@@ -181,17 +189,15 @@ export default function Home() {
               <div className="text-[14px] border-b border-zinc-100 py-1">
                 <p>idx | nome | categoria | quantidade | preço</p>
               </div>
-              {
-                resultados.length === 0 ? (
-                  <p className="text-gray-400 text-sm mt-2">Nenhum dado processado.</p>
-                ) : (
-                  resultados.map((item) => (
-                    <div key={item.idx} className="text-[12px] border-b border-zinc-100 py-1">
-                      {item.idx} | {item.nome} | {item.categoria} | {item.quantidade} | R$ {item.preco.toFixed(2)}
-                    </div>
-                  ))
-                )
-              }
+              {resultados.length === 0 ? (
+                <p className="text-gray-400 text-sm mt-2">Nenhum dado processado.</p>
+              ) : (
+                resultados.map((item) => (
+                  <div key={item.idx} className="text-[12px] border-b border-zinc-100 py-1">
+                    {item.idx} | {item.nome} | {item.categoria} | {item.quantidade} | R$ {item.preco.toFixed(2)}
+                  </div>
+                ))
+              )}
             </div>
           </Profiler>
         </div>
@@ -230,7 +236,7 @@ export default function Home() {
                   </div>
                   <div className="flex flex-row gap-4 mt-1 text-zinc-500">
                     <span>latência: <span className="font-semibold text-zinc-700">{h.latencia}</span></span>
-                    <span>renderização: <span className="font-semibold text-zinc-700">{h.renderizacao}</span></span>
+                    <span>render: <span className="font-semibold text-zinc-700">{h.renderizacao}</span></span>
                   </div>
                 </div>
               ))
