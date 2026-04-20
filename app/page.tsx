@@ -43,11 +43,11 @@ export default function Home() {
 
   const executarBenchmark = () => {
     if (!estrutura || !operacao || volumeNumerico === 0) {
-      alert("Selecione estrutura, volume e operação!");
+      alert(operacao === "Busca" ? "Digite um idx para buscar!" : "Digite uma categoria para filtrar!");
       return;
     }
 
-     if (operacao === "Busca" && termoBusca === "") {
+     if ((operacao === "Busca" || operacao === "Filtro")&& termoBusca === "") {
       alert("Digite um idx para buscar!");
       return;
     }
@@ -63,6 +63,10 @@ export default function Home() {
       } else if(operacao === "Busca") {
         const encontrado = copiaTeste.find((item) => item.idx === Number(termoBusca));
         res = encontrado ? [encontrado] :[];
+      } else {
+        res = copiaTeste.filter((item) => (
+          item.categoria.toLowerCase().includes(termoBusca.toLowerCase())
+        ));
       }
     }
 
@@ -76,6 +80,12 @@ export default function Home() {
         copiaTeste.forEach((item) => mapa.set(item.idx, item));
         const encontrado = mapa.get(Number(termoBusca));
         res = encontrado ? [encontrado] : [];
+      } else {
+        const mapa = new Map<number, Registro>();
+        copiaTeste.forEach((item) => mapa.set(item.idx, item));
+        res = [...mapa.values()].filter((item) =>
+          item.categoria.toLowerCase().includes(termoBusca.toLowerCase())
+         );
       }
     }
 
@@ -172,13 +182,13 @@ export default function Home() {
             </div>
             <div>
               {
-                operacao === "Busca" && (
+                (operacao === "Busca" || operacao === "Filtro") && (
                   <input
                     type="text"
                     value={termoBusca}
                     onChange={(e) => setTermoBusca(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && executarBenchmark()}
-                    placeholder="Digite o idx para buscar..."
+                    placeholder={operacao === "Busca" ? "Digite o idx para buscar..." : "Digite a categoria para filtragem..."}
                     className="w-[290px] text-sm border border-zinc-300 rounded-md px-3 py-2 mt-4"
                   />
                 )
