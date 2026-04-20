@@ -5,7 +5,7 @@ import { ChartBar, Play, RotateCcw, Clock } from "lucide-react";
 import Button from "@/src/components/Button";
 import { geracaoDeDados, Registro } from "@/src/utils/generateData";
 
-type HistoricoEntry = {
+type Historico = {
   estrutura: string;
   operacao: string;
   volume: number;
@@ -17,16 +17,17 @@ export default function Home() {
   const [estrutura, setEstrutura] = useState<string | null>(null);
   const [volume, setVolume] = useState<string | null>(null);
   const [operacao, setOperacao] = useState<string | null>(null);
+  const [termoBusca, setTermoBusca] = useState<string>("");
 
   const [tempoDeResposta, setTempoDeResposta] = useState<string>("0.000 ms");
   const [tempoRenderizacao, setTempoRenderizacao] = useState<string>("0.000 ms");
   const [logs, setLogs] = useState<string>("");
   const [resultados, setResultados] = useState<Registro[]>([]);
-  const [historico, setHistorico] = useState<HistoricoEntry[]>([]);
+  const [historico, setHistorico] = useState<Historico[]>([]);
 
   const estruturas = ["array", "hashmap", "árvore binária", "árvore avl", "map", "set"];
   const volumes = ["Pequeno | 10k", "Médio | 50k", "Grande | 100k"];
-  const operacoes = ["Busca", "Ordenação", "Filtrar"];
+  const operacoes = ["Busca", "Ordenação", "Filtro"];
 
   const volumeNumerico = useMemo(() => {
     if (volume?.includes("10k")) return 10000;
@@ -46,6 +47,11 @@ export default function Home() {
       return;
     }
 
+     if (operacao === "Busca" && termoBusca === "") {
+      alert("Digite um idx para buscar!");
+      return;
+    }
+
     const copiaTeste = [...dadosMestre];
     let res: Registro[] = [];
 
@@ -54,6 +60,9 @@ export default function Home() {
     if (estrutura === "array") {
       if (operacao === "Ordenação") {
         res = copiaTeste.sort((a, b) => a.preco - b.preco);
+      } else if(operacao === "Busca") {
+        const encontrado = copiaTeste.find((item) => item.idx === Number(termoBusca));
+        res = encontrado ? [encontrado] :[];
       }
     }
 
@@ -62,6 +71,11 @@ export default function Home() {
         const mapa = new Map<number, Registro>();
         copiaTeste.forEach((item) => mapa.set(item.idx, item));
         res = [...mapa.values()].sort((a, b) => a.preco - b.preco);
+      } else if(operacao === "Busca") {
+        const mapa = new Map<number, Registro>()
+        copiaTeste.forEach((item) => mapa.set(item.idx, item));
+        const encontrado = mapa.get(Number(termoBusca));
+        res = encontrado ? [encontrado] : [];
       }
     }
 
@@ -72,7 +86,7 @@ export default function Home() {
     setResultados(res.slice(0, volumeNumerico));
     setLogs(`Sucesso: ${estrutura} processou ${volumeNumerico} registros em modo ${operacao}.`);
 
-    const novaEntrada: HistoricoEntry = {
+    const novaEntrada: Historico = {
       estrutura: estrutura!,
       operacao: operacao!,
       volume: volumeNumerico,
@@ -105,6 +119,7 @@ export default function Home() {
     setLogs("Ambiente reiniciado.");
     setResultados([]);
     setHistorico([]);
+    setTermoBusca("");
   };
 
   return (
@@ -154,6 +169,20 @@ export default function Home() {
                 <RotateCcw />
                 Zerar
               </button>
+            </div>
+            <div>
+              {
+                operacao === "Busca" && (
+                  <input
+                    type="text"
+                    value={termoBusca}
+                    onChange={(e) => setTermoBusca(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && executarBenchmark()}
+                    placeholder="Digite o idx para buscar..."
+                    className="w-[290px] text-sm border border-zinc-300 rounded-md px-3 py-2 mt-4"
+                  />
+                )
+              }
             </div>
           </div>
         </div>
