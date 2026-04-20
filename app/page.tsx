@@ -4,6 +4,7 @@ import { Profiler, ProfilerOnRenderCallback, useMemo, useState } from "react";
 import { ChartBar, Play, RotateCcw, Clock } from "lucide-react";
 import Button from "@/src/components/Button";
 import { geracaoDeDados, Registro } from "@/src/utils/generateData";
+import { executar } from "@/src/utils/benchmarks";
 
 type Historico = {
   estrutura: string;
@@ -43,75 +44,37 @@ export default function Home() {
 
   const executarBenchmark = () => {
     if (!estrutura || !operacao || volumeNumerico === 0) {
+      alert("Selecione estrutura, volume e operação!");
+      return;
+    }
+
+    if ((operacao === "Busca" || operacao === "Filtro") && termoBusca === "") {
       alert(operacao === "Busca" ? "Digite um idx para buscar!" : "Digite uma categoria para filtrar!");
       return;
     }
 
-     if ((operacao === "Busca" || operacao === "Filtro")&& termoBusca === "") {
-      alert("Digite um idx para buscar!");
-      return;
-    }
-
     const copiaTeste = [...dadosMestre];
-    let res: Registro[] = [];
 
     const t0 = performance.now();
-
-    if (estrutura === "array") {
-      if (operacao === "Ordenação") {
-        res = copiaTeste.sort((a, b) => a.preco - b.preco);
-      } else if(operacao === "Busca") {
-        const encontrado = copiaTeste.find((item) => item.idx === Number(termoBusca));
-        res = encontrado ? [encontrado] :[];
-      } else {
-        res = copiaTeste.filter((item) => (
-          item.categoria.toLowerCase().includes(termoBusca.toLowerCase())
-        ));
-      }
-    }
-
-    if (estrutura === "map") {
-      if (operacao === "Ordenação") {
-        const mapa = new Map<number, Registro>();
-        copiaTeste.forEach((item) => mapa.set(item.idx, item));
-        res = [...mapa.values()].sort((a, b) => a.preco - b.preco);
-      } else if(operacao === "Busca") {
-        const mapa = new Map<number, Registro>()
-        copiaTeste.forEach((item) => mapa.set(item.idx, item));
-        const encontrado = mapa.get(Number(termoBusca));
-        res = encontrado ? [encontrado] : [];
-      } else {
-        const mapa = new Map<number, Registro>();
-        copiaTeste.forEach((item) => mapa.set(item.idx, item));
-        res = [...mapa.values()].filter((item) =>
-          item.categoria.toLowerCase().includes(termoBusca.toLowerCase())
-         );
-      }
-    }
-
+    const res = executar(estrutura, operacao, copiaTeste, termoBusca);
     const t1 = performance.now();
+
     const latencia = `${(t1 - t0).toFixed(4)} ms`;
 
     setTempoDeResposta(latencia);
-    setResultados(res.slice(0, volumeNumerico));
+    setResultados(res);
     setLogs(`Sucesso: ${estrutura} processou ${volumeNumerico} registros em modo ${operacao}.`);
 
-    const novaEntrada: Historico = {
-      estrutura: estrutura!,
-      operacao: operacao!,
-      volume: volumeNumerico,
-      latencia,
-      renderizacao: "—",
-    };
-
-    setHistorico((prev) => [novaEntrada, ...prev].slice(0, 5));
+    setHistorico((prev) => [
+      { estrutura, operacao, volume: volumeNumerico, latencia, renderizacao: "—" },
+      ...prev,
+    ].slice(0, 5));
   };
 
   const renderizacaoCallback: ProfilerOnRenderCallback = (id, phase, actualDuration) => {
     if (phase === "update") {
       const tempo = `${actualDuration.toFixed(4)} ms`;
       setTempoRenderizacao(tempo);
-
       setHistorico((prev) => {
         if (prev.length === 0) return prev;
         const [ultima, ...resto] = prev;
@@ -181,18 +144,16 @@ export default function Home() {
               </button>
             </div>
             <div>
-              {
-                (operacao === "Busca" || operacao === "Filtro") && (
-                  <input
-                    type="text"
-                    value={termoBusca}
-                    onChange={(e) => setTermoBusca(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && executarBenchmark()}
-                    placeholder={operacao === "Busca" ? "Digite o idx para buscar..." : "Digite a categoria para filtragem..."}
-                    className="w-[290px] text-sm border border-zinc-300 rounded-md px-3 py-2 mt-4"
-                  />
-                )
-              }
+              {(operacao === "Busca" || operacao === "Filtro") && (
+                <input
+                  type="text"
+                  value={termoBusca}
+                  onChange={(e) => setTermoBusca(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && executarBenchmark()}
+                  placeholder={operacao === "Busca" ? "Digite o idx para buscar..." : "Digite a categoria para filtragem..."}
+                  className="w-[290px] text-sm border border-zinc-300 rounded-md px-3 py-2 mt-4"
+                />
+              )}
             </div>
           </div>
         </div>
@@ -255,9 +216,7 @@ export default function Home() {
                 <div
                   key={i}
                   className={`text-[12px] rounded-md p-2 border ${
-                    i === 0
-                      ? "border-[#00BC7D] bg-green-50"
-                      : "border-zinc-100 bg-zinc-50"
+                    i === 0 ? "border-[#00BC7D] bg-green-50" : "border-zinc-100 bg-zinc-50"
                   }`}
                 >
                   <div className="flex flex-row items-center gap-2">
