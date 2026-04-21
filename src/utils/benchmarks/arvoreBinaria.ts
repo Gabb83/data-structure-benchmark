@@ -31,7 +31,19 @@ class Arvore {
 
   emOrdem(): Registro[] {
     const resultado: Registro[] = [];
-    this._emOrdem(this.raiz, resultado);
+    const pilha: No[] = [];
+    let atual: No | null = this.raiz;
+
+    while (atual !== null || pilha.length > 0) {
+      while (atual !== null) {
+        pilha.push(atual);
+        atual = atual.esquerda;
+      }
+      atual = pilha.pop()!;
+      resultado.push(atual.registro);
+      atual = atual.direita;
+    }
+
     return resultado;
   }
 
@@ -44,18 +56,12 @@ class Arvore {
   }
 
   buscarPorIdx(idx: number): Registro | null {
-    return this._buscarIdx(this.raiz, idx);
-  }
-
-  private _buscarIdx(no: No | null, idx: number): Registro | null {
-    if (no === null) return null;
-    if (no.registro.idx === idx) return no.registro;
-
-    if (idx < no.registro.idx) {
-      return this._buscarIdx(no.esquerda, idx);
-    } else {
-      return this._buscarIdx(no.direita, idx);
+    let atual = this.raiz;
+    while (atual !== null) {
+      if (idx === atual.registro.idx) return atual.registro;
+      atual = idx < atual.registro.idx ? atual.esquerda : atual.direita;
     }
+    return null;
   }
 
   filtrarCategoria(termo: string): Registro[] {
@@ -78,8 +84,9 @@ class Arvore {
 
 export function benchmarkArvoreBinaria(operacao: string, dados: Registro[], termo: string): Registro[] {
   const abb = new Arvore();
-
-  dados.forEach((item) => (abb.inserir(item)));
+  
+  const embaralhado = [...dados].sort(() => Math.random() - 0.5);
+  embaralhado.forEach((item) => abb.inserir(item));
 
   if(operacao === "Ordenação") return abb.emOrdem();
   
@@ -88,6 +95,6 @@ export function benchmarkArvoreBinaria(operacao: string, dados: Registro[], term
     return encontrado ? [encontrado] : [];
   }
 
-  if(operacao === "Fitro") return abb.filtrarCategoria(termo);
+  if(operacao === "Filtro") return abb.filtrarCategoria(termo);
   return [];
 }
