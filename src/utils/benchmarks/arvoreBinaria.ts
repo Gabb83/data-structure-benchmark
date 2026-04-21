@@ -47,14 +47,6 @@ class Arvore {
     return resultado;
   }
 
-  private _emOrdem(no: No | null, resultado: Registro[]) {
-    if (no === null) return;
-
-    this._emOrdem(no.esquerda, resultado);
-    resultado.push(no.registro);
-    this._emOrdem(no.direita, resultado);
-  }
-
   buscarPorIdx(idx: number): Registro | null {
     let atual = this.raiz;
     while (atual !== null) {
