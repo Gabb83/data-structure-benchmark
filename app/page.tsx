@@ -4,8 +4,9 @@ import { Profiler, ProfilerOnRenderCallback, useMemo, useState } from "react";
 import { ChartBar, Play, RotateCcw, Clock } from "lucide-react";
 import Button from "@/src/components/Button";
 import { geracaoDeDados, Registro } from "@/src/utils/generateData";
+import { executar } from "@/src/utils/benchmarks";
 
-type HistoricoEntry = {
+type Historico = {
   estrutura: string;
   operacao: string;
   volume: number;
@@ -17,16 +18,17 @@ export default function Home() {
   const [estrutura, setEstrutura] = useState<string | null>(null);
   const [volume, setVolume] = useState<string | null>(null);
   const [operacao, setOperacao] = useState<string | null>(null);
+  const [termoBusca, setTermoBusca] = useState<string>("");
 
   const [tempoDeResposta, setTempoDeResposta] = useState<string>("0.000 ms");
   const [tempoRenderizacao, setTempoRenderizacao] = useState<string>("0.000 ms");
   const [logs, setLogs] = useState<string>("");
   const [resultados, setResultados] = useState<Registro[]>([]);
-  const [historico, setHistorico] = useState<HistoricoEntry[]>([]);
+  const [historico, setHistorico] = useState<Historico[]>([]);
 
   const estruturas = ["array", "hashmap", "árvore binária", "árvore avl", "map", "set"];
   const volumes = ["Pequeno | 10k", "Médio | 50k", "Grande | 100k"];
-  const operacoes = ["Busca", "Ordenação", "Filtrar"];
+  const operacoes = ["Busca", "Ordenação", "Filtro"];
 
   const volumeNumerico = useMemo(() => {
     if (volume?.includes("10k")) return 10000;
@@ -46,48 +48,33 @@ export default function Home() {
       return;
     }
 
+    if ((operacao === "Busca" || operacao === "Filtro") && termoBusca === "") {
+      alert(operacao === "Busca" ? "Digite um idx para buscar!" : "Digite uma categoria para filtrar!");
+      return;
+    }
+
     const copiaTeste = [...dadosMestre];
-    let res: Registro[] = [];
 
     const t0 = performance.now();
-
-    if (estrutura === "array") {
-      if (operacao === "Ordenação") {
-        res = copiaTeste.sort((a, b) => a.preco - b.preco);
-      }
-    }
-
-    if (estrutura === "map") {
-      if (operacao === "Ordenação") {
-        const mapa = new Map<number, Registro>();
-        copiaTeste.forEach((item) => mapa.set(item.idx, item));
-        res = [...mapa.values()].sort((a, b) => a.preco - b.preco);
-      }
-    }
-
+    const res = executar(estrutura, operacao, copiaTeste, termoBusca);
     const t1 = performance.now();
+
     const latencia = `${(t1 - t0).toFixed(4)} ms`;
 
     setTempoDeResposta(latencia);
-    setResultados(res.slice(0, volumeNumerico));
+    setResultados(res);
     setLogs(`Sucesso: ${estrutura} processou ${volumeNumerico} registros em modo ${operacao}.`);
 
-    const novaEntrada: HistoricoEntry = {
-      estrutura: estrutura!,
-      operacao: operacao!,
-      volume: volumeNumerico,
-      latencia,
-      renderizacao: "—",
-    };
-
-    setHistorico((prev) => [novaEntrada, ...prev].slice(0, 5));
+    setHistorico((prev) => [
+      { estrutura, operacao, volume: volumeNumerico, latencia, renderizacao: "—" },
+      ...prev,
+    ].slice(0, 5));
   };
 
   const renderizacaoCallback: ProfilerOnRenderCallback = (id, phase, actualDuration) => {
     if (phase === "update") {
       const tempo = `${actualDuration.toFixed(4)} ms`;
       setTempoRenderizacao(tempo);
-
       setHistorico((prev) => {
         if (prev.length === 0) return prev;
         const [ultima, ...resto] = prev;
@@ -105,6 +92,7 @@ export default function Home() {
     setLogs("Ambiente reiniciado.");
     setResultados([]);
     setHistorico([]);
+    setTermoBusca("");
   };
 
   return (
@@ -154,6 +142,18 @@ export default function Home() {
                 <RotateCcw />
                 Zerar
               </button>
+            </div>
+            <div>
+              {(operacao === "Busca" || operacao === "Filtro") && (
+                <input
+                  type="text"
+                  value={termoBusca}
+                  onChange={(e) => setTermoBusca(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && executarBenchmark()}
+                  placeholder={operacao === "Busca" ? "Digite o idx para buscar..." : "Digite a categoria para filtragem..."}
+                  className="w-[290px] text-sm border border-zinc-300 rounded-md px-3 py-2 mt-4"
+                />
+              )}
             </div>
           </div>
         </div>
@@ -216,9 +216,7 @@ export default function Home() {
                 <div
                   key={i}
                   className={`text-[12px] rounded-md p-2 border ${
-                    i === 0
-                      ? "border-[#00BC7D] bg-green-50"
-                      : "border-zinc-100 bg-zinc-50"
+                    i === 0 ? "border-[#00BC7D] bg-green-50" : "border-zinc-100 bg-zinc-50"
                   }`}
                 >
                   <div className="flex flex-row items-center gap-2">
