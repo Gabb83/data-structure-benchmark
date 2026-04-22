@@ -1,6 +1,6 @@
 "use client";
 
-import { Profiler, ProfilerOnRenderCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ChartBar, Play, RotateCcw, Clock } from "lucide-react";
 import Button from "@/src/components/Button";
 import { geracaoDeDados, Registro } from "@/src/utils/generateData";
@@ -27,7 +27,6 @@ export default function Home() {
   const [historico, setHistorico] = useState<Historico[]>([]);
 
   const [fps, setFps] = useState<number>(0);
-  const fpsRef = useRef<number>(0);
   const framesRef = useRef<number>(0);
   const ultimoTempoFps = useRef<number>(0);
 
@@ -38,8 +37,7 @@ export default function Home() {
       const agora = performance.now();
       framesRef.current++;
 
-      if(agora-ultimoTempoFps.current >= 1000) {
-        fpsRef.current = framesRef.current;
+      if (agora - ultimoTempoFps.current >= 1000) {
         setFps(framesRef.current);
         framesRef.current = 0;
         ultimoTempoFps.current = agora;
@@ -49,9 +47,28 @@ export default function Home() {
     };
 
     animationId = requestAnimationFrame(calcularFps);
-
     return () => cancelAnimationFrame(animationId);
   }, []);
+
+  const renderStartRef = useRef<number>(0);
+
+  useEffect(() => {
+    renderStartRef.current = performance.now();
+  }, [resultados]);
+
+  useEffect(() => {
+    if (renderStartRef.current === 0) return;
+    const tempo = performance.now() - renderStartRef.current;
+    const tempoFormatado = `${tempo.toFixed(4)} ms`;
+
+    setTempoRenderizacao(tempoFormatado);
+
+    setHistorico((prev) => {
+      if (prev.length === 0) return prev;
+      const [ultima, ...resto] = prev;
+      return [{ ...ultima, renderizacao: tempoFormatado }, ...resto];
+    });
+  }, [resultados]);
 
   const estruturas = ["array", "hashmap", "árvore binária", "árvore avl", "map", "set"];
   const volumes = ["Pequeno | 10k", "Médio | 50k", "Grande | 100k"];
@@ -89,25 +106,13 @@ export default function Home() {
     const latencia = `${(t1 - t0).toFixed(4)} ms`;
 
     setTempoDeResposta(latencia);
-    setResultados(res);
+    setResultados(res.slice(0, 100));
     setLogs(`Sucesso: ${estrutura} processou ${volumeNumerico} registros em modo ${operacao}.`);
 
     setHistorico((prev) => [
       { estrutura, operacao, volume: volumeNumerico, latencia, renderizacao: "—" },
       ...prev,
     ].slice(0, 5));
-  };
-
-  const renderizacaoCallback: ProfilerOnRenderCallback = (id, phase, actualDuration) => {
-    if (phase === "update") {
-      const tempo = `${actualDuration.toFixed(4)} ms`;
-      setTempoRenderizacao(tempo);
-      setHistorico((prev) => {
-        if (prev.length === 0) return prev;
-        const [ultima, ...resto] = prev;
-        return [{ ...ultima, renderizacao: tempo }, ...resto];
-      });
-    }
   };
 
   const zerarAmbiente = () => {
@@ -120,6 +125,7 @@ export default function Home() {
     setResultados([]);
     setHistorico([]);
     setTermoBusca("");
+    renderStartRef.current = 0;
   };
 
   return (
@@ -135,11 +141,11 @@ export default function Home() {
             <p className="border-b-[1.5px] border-zinc-200 mb-3">Estrutura de dados:</p>
             <div className="flex flex-row gap-2">
               {estruturas.map((item) => (
-                <Button 
-                  key={item} 
-                  nome={item} 
-                  selecionado={estrutura === item} 
-                  onClick={() => setEstrutura(item)} 
+                <Button
+                  key={item}
+                  nome={item}
+                  selecionado={estrutura === item}
+                  onClick={() => setEstrutura(item)}
                 />
               ))}
             </div>
@@ -149,11 +155,11 @@ export default function Home() {
             <p className="border-b-[1.5px] border-zinc-200 mb-3">Volume de dados:</p>
             <div className="flex flex-row gap-2">
               {volumes.map((item) => (
-                <Button 
-                  key={item} 
-                  nome={item} 
-                  selecionado={volume === item} 
-                  onClick={() => setVolume(item)} 
+                <Button
+                  key={item}
+                  nome={item}
+                  selecionado={volume === item}
+                  onClick={() => setVolume(item)}
                 />
               ))}
             </div>
@@ -163,11 +169,11 @@ export default function Home() {
             <p className="border-b-[1.5px] border-zinc-200 mb-3">Operações:</p>
             <div className="flex flex-row gap-3">
               {operacoes.map((item) => (
-                <Button 
-                  key={item} 
-                  nome={item} 
-                  selecionado={operacao === item} 
-                  onClick={() => setOperacao(item)} 
+                <Button
+                  key={item}
+                  nome={item}
+                  selecionado={operacao === item}
+                  onClick={() => setOperacao(item)}
                 />
               ))}
               <button
@@ -226,22 +232,20 @@ export default function Home() {
             <p className="font-bold">Lista de resultado</p>
           </div>
 
-          <Profiler id="ListaResultados" onRender={renderizacaoCallback}>
-            <div className="h-[220px] bg-zinc-50 border border-[#E5E7EB] rounded-md overflow-y-auto p-2">
-              <div className="text-[14px] border-b border-zinc-100 py-1">
-                <p>idx | nome | categoria | quantidade | preço</p>
-              </div>
-              {resultados.length === 0 ? (
-                <p className="text-gray-400 text-sm mt-2">Nenhum dado processado.</p>
-              ) : (
-                resultados.map((item) => (
-                  <div key={item.idx} className="text-[12px] border-b border-zinc-100 py-1">
-                    {item.idx} | {item.nome} | {item.categoria} | {item.quantidade} | R$ {item.preco.toFixed(2)}
-                  </div>
-                ))
-              )}
+          <div className="h-[220px] bg-zinc-50 border border-[#E5E7EB] rounded-md overflow-y-auto p-2">
+            <div className="text-[14px] border-b border-zinc-100 py-1">
+              <p>idx | nome | categoria | quantidade | preço</p>
             </div>
-          </Profiler>
+            {resultados.length === 0 ? (
+              <p className="text-gray-400 text-sm mt-2">Nenhum dado processado.</p>
+            ) : (
+              resultados.map((item) => (
+                <div key={item.idx} className="text-[12px] border-b border-zinc-100 py-1">
+                  {item.idx} | {item.nome} | {item.categoria} | {item.quantidade} | R$ {item.preco.toFixed(2)}
+                </div>
+              ))
+            )}
+          </div>
         </div>
 
         <div className="col-span-2 bg-[#ffffff] border-none rounded-md shadow-md p-2">
