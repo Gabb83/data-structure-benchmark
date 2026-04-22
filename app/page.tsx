@@ -1,6 +1,6 @@
 "use client";
 
-import { Profiler, ProfilerOnRenderCallback, useMemo, useState } from "react";
+import { Profiler, ProfilerOnRenderCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChartBar, Play, RotateCcw, Clock } from "lucide-react";
 import Button from "@/src/components/Button";
 import { geracaoDeDados, Registro } from "@/src/utils/generateData";
@@ -25,6 +25,33 @@ export default function Home() {
   const [logs, setLogs] = useState<string>("");
   const [resultados, setResultados] = useState<Registro[]>([]);
   const [historico, setHistorico] = useState<Historico[]>([]);
+
+  const [fps, setFps] = useState<number>(0);
+  const fpsRef = useRef<number>(0);
+  const framesRef = useRef<number>(0);
+  const ultimoTempoFps = useRef<number>(0);
+
+  useEffect(() => {
+    let animationId: number;
+
+    const calcularFps = () => {
+      const agora = performance.now();
+      framesRef.current++;
+
+      if(agora-ultimoTempoFps.current >= 1000) {
+        fpsRef.current = framesRef.current;
+        setFps(framesRef.current);
+        framesRef.current = 0;
+        ultimoTempoFps.current = agora;
+      }
+
+      animationId = requestAnimationFrame(calcularFps);
+    };
+
+    animationId = requestAnimationFrame(calcularFps);
+
+    return () => cancelAnimationFrame(animationId);
+  }, []);
 
   const estruturas = ["array", "hashmap", "árvore binária", "árvore avl", "map", "set"];
   const volumes = ["Pequeno | 10k", "Médio | 50k", "Grande | 100k"];
@@ -108,7 +135,12 @@ export default function Home() {
             <p className="border-b-[1.5px] border-zinc-200 mb-3">Estrutura de dados:</p>
             <div className="flex flex-row gap-2">
               {estruturas.map((item) => (
-                <Button key={item} nome={item} selecionado={estrutura === item} onClick={() => setEstrutura(item)} />
+                <Button 
+                  key={item} 
+                  nome={item} 
+                  selecionado={estrutura === item} 
+                  onClick={() => setEstrutura(item)} 
+                />
               ))}
             </div>
           </div>
@@ -117,7 +149,12 @@ export default function Home() {
             <p className="border-b-[1.5px] border-zinc-200 mb-3">Volume de dados:</p>
             <div className="flex flex-row gap-2">
               {volumes.map((item) => (
-                <Button key={item} nome={item} selecionado={volume === item} onClick={() => setVolume(item)} />
+                <Button 
+                  key={item} 
+                  nome={item} 
+                  selecionado={volume === item} 
+                  onClick={() => setVolume(item)} 
+                />
               ))}
             </div>
           </div>
@@ -126,7 +163,12 @@ export default function Home() {
             <p className="border-b-[1.5px] border-zinc-200 mb-3">Operações:</p>
             <div className="flex flex-row gap-3">
               {operacoes.map((item) => (
-                <Button key={item} nome={item} selecionado={operacao === item} onClick={() => setOperacao(item)} />
+                <Button 
+                  key={item} 
+                  nome={item} 
+                  selecionado={operacao === item} 
+                  onClick={() => setOperacao(item)} 
+                />
               ))}
               <button
                 onClick={executarBenchmark}
@@ -171,7 +213,7 @@ export default function Home() {
             </div>
             <div className="bg-zinc-50 w-[250px] h-[150px] border border-[2px] border-[#E5E7EB] rounded-md p-1">
               <p className="text-sm text-zinc-500">taxa de quadros FPS:</p>
-              <p className="text-xl text-zinc-700 font-bold">dado</p>
+              <p className="text-xl text-zinc-700 font-bold">{fps} fps</p>
             </div>
           </div>
         </div>
