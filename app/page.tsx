@@ -187,17 +187,17 @@ export default function Home() {
   };
 
   return (
-    <div className="bg-[#F9FAFB] pb-5">
+    <div className="bg-[#F9FAFB] pb-5 min-h-screen">
       <div className="bg-[#222222] text-[#ffffff] pt-2 mb-6 p-3">
         <p className="text-[18px] font-semibold">Data Structure Benchmark — MVP</p>
-        <p>ambiente de teste • Next.js | TypeScript</p>
+        <p className="text-sm">ambiente de teste • Next.js | TypeScript</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-5 px-5">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 px-3 md:px-5">
         <div>
           <div>
             <p className="border-b-[1.5px] border-zinc-200 mb-3">Estrutura de dados:</p>
-            <div className="flex flex-row gap-2">
+            <div className="flex flex-row flex-wrap gap-2">
               {estruturas.map((item) => (
                 <Button key={item} nome={item} selecionado={estrutura === item} onClick={() => setEstrutura(item)} />
               ))}
@@ -206,7 +206,7 @@ export default function Home() {
 
           <div className="pt-4">
             <p className="border-b-[1.5px] border-zinc-200 mb-3">Volume de dados:</p>
-            <div className="flex flex-row gap-2">
+            <div className="flex flex-row flex-wrap gap-2">
               {volumes.map((item) => (
                 <Button key={item} nome={item} selecionado={volume === item} onClick={() => setVolume(item)} />
               ))}
@@ -215,13 +215,13 @@ export default function Home() {
 
           <div className="pt-4">
             <p className="border-b-[1.5px] border-zinc-200 mb-3">Operações:</p>
-            <div className="flex flex-row gap-3">
+            <div className="flex flex-row flex-wrap gap-2">
               {operacoes.map((item) => (
                 <Button key={item} nome={item} selecionado={operacao === item} onClick={() => setOperacao(item)} />
               ))}
               <button
                 onClick={executarBenchmark}
-                className="w-[120px] h-[40px] bg-[#00BC7D] text-white flex flex-row items-center justify-center gap-2 border border-none rounded-md cursor-pointer p-1 ml-8"
+                className="w-[120px] h-[40px] bg-[#00BC7D] text-white flex flex-row items-center justify-center gap-2 border border-none rounded-md cursor-pointer ml-0 sm:ml-auto p-1"
               >
                 <Play size={16} />
                 Executar
@@ -249,7 +249,7 @@ export default function Home() {
                   onChange={(e) => setTermoBusca(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && executarBenchmark()}
                   placeholder={operacao === "Busca" ? "Digite o idx para buscar..." : "Digite a categoria para filtragem..."}
-                  className="w-[290px] text-sm border border-zinc-300 rounded-md px-3 py-2 mt-4"
+                  className="w-full max-w-[290px] text-sm border border-zinc-300 rounded-md px-3 py-2 mt-4"
                 />
               )}
             </div>
@@ -258,25 +258,25 @@ export default function Home() {
 
         <div className="bg-[#ffffff] border-none rounded-md shadow-md p-3">
           <p className="text-zinc-700 font-semibold mb-2">Métricas — Última execução:</p>
-          <div className="flex flex-row gap-2">
-            <div className="bg-zinc-50 w-[250px] h-[150px] border border-[2px] border-[#E5E7EB] rounded-md p-1">
+          <div className="flex flex-row flex-wrap gap-2">
+            <div className="bg-zinc-50 flex-1 min-w-[140px] h-[150px] border border-[2px] border-[#E5E7EB] rounded-md p-1">
               <p className="text-sm text-zinc-500">tempo de resposta:</p>
-              <p className="text-xl text-zinc-700 font-bold">{tempoDeResposta}</p>
+              <p className="text-lg text-zinc-700 font-bold break-all">{tempoDeResposta}</p>
             </div>
-            <div className="bg-zinc-50 w-[250px] h-[150px] border border-[2px] border-[#E5E7EB] rounded-md p-1">
+            <div className="bg-zinc-50 flex-1 min-w-[140px] h-[150px] border border-[2px] border-[#E5E7EB] rounded-md p-1">
               <p className="text-sm text-zinc-500">tempo de renderização:</p>
-              <p className="text-xl text-zinc-700 font-bold">{tempoRenderizacao}</p>
+              <p className="text-lg text-zinc-700 font-bold break-all">{tempoRenderizacao}</p>
             </div>
-            <div className="bg-zinc-50 w-[250px] h-[150px] border border-[2px] border-[#E5E7EB] rounded-md p-1">
+            <div className="bg-zinc-50 flex-1 min-w-[140px] h-[150px] border border-[2px] border-[#E5E7EB] rounded-md p-1">
               <p className="text-sm text-zinc-500">taxa de quadros FPS:</p>
-              <p className="text-xl text-zinc-700 font-bold">{fps} fps</p>
+              <p className="text-lg text-zinc-700 font-bold">{fps} fps</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-5 gap-5 pt-10 px-5">
-        <div className="h-full col-span-2 bg-[#ffffff] border-none rounded-md shadow-md p-2">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-5 pt-10 px-3 md:px-5">
+        <div className="h-full lg:col-span-2 bg-[#ffffff] border-none rounded-md shadow-md p-2">
           <div className="flex flex-row items-center gap-3 pb-2">
             <ChartBar />
             <p className="font-bold">Lista de resultado</p>
@@ -303,7 +303,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="col-span-3 bg-[#ffffff] border-none rounded-md shadow-md p-2">
+        <div className="lg:col-span-3 bg-[#ffffff] border-none rounded-md shadow-md p-2">
           <div className="flex flex-row items-center gap-3 pb-2 border-b border-zinc-100">
             <Clock size={18} />
             <p className="font-bold">Histórico de execuções</p>
@@ -320,7 +320,7 @@ export default function Home() {
                     i === 0 ? "border-[#00BC7D] bg-green-50" : "border-zinc-100 bg-zinc-50"
                   }`}
                 >
-                  <div className="flex flex-row items-center gap-2">
+                  <div className="flex flex-row flex-wrap items-center gap-2">
                     <span className="text-zinc-400 font-mono">#{i + 1}</span>
                     <span className="font-semibold text-zinc-700">{h.estrutura}</span>
                     <span className="text-zinc-400">|</span>
@@ -333,7 +333,7 @@ export default function Home() {
                       </span>
                     )}
                   </div>
-                  <div className="flex flex-row gap-4 mt-1 text-zinc-500">
+                  <div className="flex flex-row flex-wrap gap-4 mt-1 text-zinc-500">
                     <span>latência: <span className="font-semibold text-zinc-700">{h.latencia}</span></span>
                     <span>render: <span className="font-semibold text-zinc-700">{h.renderizacao}</span></span>
                   </div>
@@ -345,9 +345,9 @@ export default function Home() {
       </div>
 
       {dadosGrafico.length > 0 && (
-        <div className="px-5 pt-5">
+        <div className="px-3 md:px-5 pt-5">
           <div className="bg-[#ffffff] border-none rounded-md shadow-md p-4">
-            <div className="flex flex-row items-center gap-3 pb-4 border-b border-zinc-100">
+            <div className="flex flex-row flex-wrap items-center gap-3 pb-4 border-b border-zinc-100">
               <ChartBar size={18} />
               <p className="font-bold">Latência por execução</p>
               <span className="ml-2 text-[12px] text-zinc-400">{labelGrafico}</span>
