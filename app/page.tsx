@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { ChartBar, Play, RotateCcw, Clock } from "lucide-react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { ChartBar, Play, RotateCcw, Clock, FlaskConical } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import Button from "@/src/components/Button";
 import { geracaoDeDados, Registro } from "@/src/utils/generateData";
 import { executar } from "@/src/utils/benchmarks";
@@ -14,21 +15,29 @@ type Historico = {
   renderizacao: string;
 };
 
+type DadoGrafico = {
+  execucao: string;
+  latencia: number;
+};
+
 export default function Home() {
   const [estrutura, setEstrutura] = useState<string | null>(null);
   const [volume, setVolume] = useState<string | null>(null);
   const [operacao, setOperacao] = useState<string | null>(null);
   const [termoBusca, setTermoBusca] = useState<string>("");
 
-  const [tempoDeResposta, setTempoDeResposta] = useState<string>("0.000 ms");
-  const [tempoRenderizacao, setTempoRenderizacao] = useState<string>("0.000 ms");
-  const [logs, setLogs] = useState<string>("");
+  const [tempoDeResposta, setTempoDeResposta] = useState<string>("0.0 ms");
+  const [tempoRenderizacao, setTempoRenderizacao] = useState<string>("0.0 ms");
   const [resultados, setResultados] = useState<Registro[]>([]);
+  const [totalResultados, setTotalResultados] = useState<number>(0);
   const [historico, setHistorico] = useState<Historico[]>([]);
-
+  const [dadosGrafico, setDadosGrafico] = useState<DadoGrafico[]>([]);
+  const [labelGrafico, setLabelGrafico] = useState<string>("");
   const [fps, setFps] = useState<number>(0);
+
   const framesRef = useRef<number>(0);
   const ultimoTempoFps = useRef<number>(0);
+  const isFirstRender = useRef<boolean>(true);
 
   useEffect(() => {
     let animationId: number;
@@ -50,27 +59,29 @@ export default function Home() {
     return () => cancelAnimationFrame(animationId);
   }, []);
 
-  const renderStartRef = useRef<number>(0);
+  useLayoutEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    if (resultados.length === 0) return;
 
-  useEffect(() => {
-    renderStartRef.current = performance.now();
+    const t0 = performance.now();
+
+    return () => {
+      const tempo = performance.now() - t0;
+      const tempoFormatado = `${tempo.toFixed(1)} ms`;
+
+      setTempoRenderizacao(tempoFormatado);
+      setHistorico((prev) => {
+        if (prev.length === 0) return prev;
+        const [ultima, ...resto] = prev;
+        return [{ ...ultima, renderizacao: tempoFormatado }, ...resto];
+      });
+    };
   }, [resultados]);
 
-  useEffect(() => {
-    if (renderStartRef.current === 0) return;
-    const tempo = performance.now() - renderStartRef.current;
-    const tempoFormatado = `${tempo.toFixed(4)} ms`;
-
-    setTempoRenderizacao(tempoFormatado);
-
-    setHistorico((prev) => {
-      if (prev.length === 0) return prev;
-      const [ultima, ...resto] = prev;
-      return [{ ...ultima, renderizacao: tempoFormatado }, ...resto];
-    });
-  }, [resultados]);
-
-  const estruturas = ["array", "hashmap", "árvore binária", "árvore avl", "map", "set"];
+  const estruturas = ["Array", "Hashmap", "Árvore Binária", "Árvore AVL", "Map", "Set"];
   const volumes = ["Pequeno | 10k", "Médio | 50k", "Grande | 100k"];
   const operacoes = ["Busca", "Ordenação", "Filtro"];
 
@@ -103,14 +114,59 @@ export default function Home() {
     const res = executar(estrutura, operacao, copiaTeste, termoBusca);
     const t1 = performance.now();
 
-    const latencia = `${(t1 - t0).toFixed(4)} ms`;
+    const latencia = `${(t1 - t0).toFixed(1)} ms`;
 
     setTempoDeResposta(latencia);
+    setTotalResultados(res.length);
     setResultados(res.slice(0, 100));
-    setLogs(`Sucesso: ${estrutura} processou ${volumeNumerico} registros em modo ${operacao}.`);
 
     setHistorico((prev) => [
-      { estrutura, operacao, volume: volumeNumerico, latencia, renderizacao: "—" },
+      { estrutura: estrutura!, operacao: operacao!, volume: volumeNumerico, latencia, renderizacao: "—" },
+      ...prev,
+    ].slice(0, 5));
+  };
+
+  const executarTestes = () => {
+    if (!estrutura || !operacao || volumeNumerico === 0) {
+      alert("Selecione estrutura, volume e operação!");
+      return;
+    }
+
+    if ((operacao === "Busca" || operacao === "Filtro") && termoBusca === "") {
+      alert(operacao === "Busca" ? "Digite um idx para buscar!" : "Digite uma categoria para filtrar!");
+      return;
+    }
+
+    const medicoes: number[] = [];
+
+    for (let i = 0; i < 100; i++) {
+      const copiaTeste = [...dadosMestre];
+      const t0 = performance.now();
+      executar(estrutura, operacao, copiaTeste, termoBusca);
+      const t1 = performance.now();
+      medicoes.push(t1 - t0);
+    }
+
+    const media = medicoes.reduce((acc, val) => acc + val, 0) / medicoes.length;
+    const latenciaMedia = `~${media.toFixed(1)} ms`;
+
+    const copiaTeste = [...dadosMestre];
+    const res = executar(estrutura, operacao, copiaTeste, termoBusca);
+
+    setTempoDeResposta(latenciaMedia);
+    setTotalResultados(res.length);
+    setResultados(res.slice(0, 100));
+
+    const dados: DadoGrafico[] = medicoes.map((m, i) => ({
+      execucao: `#${i + 1}`,
+      latencia: parseFloat(m.toFixed(1)),
+    }));
+
+    setDadosGrafico(dados);
+    setLabelGrafico(`${estrutura} | ${operacao} | ${(volumeNumerico / 1000).toFixed(0)}k`);
+
+    setHistorico((prev) => [
+      { estrutura: estrutura!, operacao: operacao!, volume: volumeNumerico, latencia: latenciaMedia, renderizacao: "—" },
       ...prev,
     ].slice(0, 5));
   };
@@ -119,13 +175,15 @@ export default function Home() {
     setEstrutura(null);
     setVolume(null);
     setOperacao(null);
-    setTempoDeResposta("0.000 ms");
-    setTempoRenderizacao("0.000 ms");
-    setLogs("Ambiente reiniciado.");
+    setTempoDeResposta("0.0 ms");
+    setTempoRenderizacao("0.0 ms");
     setResultados([]);
+    setTotalResultados(0);
     setHistorico([]);
     setTermoBusca("");
-    renderStartRef.current = 0;
+    setDadosGrafico([]);
+    setLabelGrafico("");
+    isFirstRender.current = true;
   };
 
   return (
@@ -141,12 +199,7 @@ export default function Home() {
             <p className="border-b-[1.5px] border-zinc-200 mb-3">Estrutura de dados:</p>
             <div className="flex flex-row gap-2">
               {estruturas.map((item) => (
-                <Button
-                  key={item}
-                  nome={item}
-                  selecionado={estrutura === item}
-                  onClick={() => setEstrutura(item)}
-                />
+                <Button key={item} nome={item} selecionado={estrutura === item} onClick={() => setEstrutura(item)} />
               ))}
             </div>
           </div>
@@ -155,12 +208,7 @@ export default function Home() {
             <p className="border-b-[1.5px] border-zinc-200 mb-3">Volume de dados:</p>
             <div className="flex flex-row gap-2">
               {volumes.map((item) => (
-                <Button
-                  key={item}
-                  nome={item}
-                  selecionado={volume === item}
-                  onClick={() => setVolume(item)}
-                />
+                <Button key={item} nome={item} selecionado={volume === item} onClick={() => setVolume(item)} />
               ))}
             </div>
           </div>
@@ -169,25 +217,27 @@ export default function Home() {
             <p className="border-b-[1.5px] border-zinc-200 mb-3">Operações:</p>
             <div className="flex flex-row gap-3">
               {operacoes.map((item) => (
-                <Button
-                  key={item}
-                  nome={item}
-                  selecionado={operacao === item}
-                  onClick={() => setOperacao(item)}
-                />
+                <Button key={item} nome={item} selecionado={operacao === item} onClick={() => setOperacao(item)} />
               ))}
               <button
                 onClick={executarBenchmark}
-                className="w-[120px] h-[40px] bg-[#00BC7D] text-white flex flex-row items-center justify-center gap-3 border border-none rounded-md cursor-pointer p-1 ml-20"
+                className="w-[120px] h-[40px] bg-[#00BC7D] text-white flex flex-row items-center justify-center gap-2 border border-none rounded-md cursor-pointer p-1 ml-8"
               >
-                <Play />
+                <Play size={16} />
                 Executar
               </button>
               <button
-                onClick={zerarAmbiente}
-                className="w-[120px] h-[40px] bg-[#FC959A] text-white flex flex-row items-center justify-center gap-3 border border-none rounded-md cursor-pointer p-1 ml-5"
+                onClick={executarTestes}
+                className="w-[140px] h-[40px] bg-[#6366F1] text-white flex flex-row items-center justify-center gap-2 border border-none rounded-md cursor-pointer p-1"
               >
-                <RotateCcw />
+                <FlaskConical size={16} />
+                Benchmark
+              </button>
+              <button
+                onClick={zerarAmbiente}
+                className="w-[120px] h-[40px] bg-[#FC959A] text-white flex flex-row items-center justify-center gap-2 border border-none rounded-md cursor-pointer p-1"
+              >
+                <RotateCcw size={16} />
                 Zerar
               </button>
             </div>
@@ -226,10 +276,15 @@ export default function Home() {
       </div>
 
       <div className="grid grid-cols-5 gap-5 pt-10 px-5">
-        <div className="h-full col-span-3 bg-[#ffffff] border-none rounded-md shadow-md p-2">
+        <div className="h-full col-span-2 bg-[#ffffff] border-none rounded-md shadow-md p-2">
           <div className="flex flex-row items-center gap-3 pb-2">
             <ChartBar />
             <p className="font-bold">Lista de resultado</p>
+            {totalResultados > 0 && (
+              <span className="ml-auto text-[11px] text-zinc-400">
+                exibindo {Math.min(100, totalResultados)} de {totalResultados} registros
+              </span>
+            )}
           </div>
 
           <div className="h-[220px] bg-zinc-50 border border-[#E5E7EB] rounded-md overflow-y-auto p-2">
@@ -248,7 +303,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="col-span-2 bg-[#ffffff] border-none rounded-md shadow-md p-2">
+        <div className="col-span-3 bg-[#ffffff] border-none rounded-md shadow-md p-2">
           <div className="flex flex-row items-center gap-3 pb-2 border-b border-zinc-100">
             <Clock size={18} />
             <p className="font-bold">Histórico de execuções</p>
@@ -288,6 +343,35 @@ export default function Home() {
           </div>
         </div>
       </div>
+
+      {dadosGrafico.length > 0 && (
+        <div className="px-5 pt-5">
+          <div className="bg-[#ffffff] border-none rounded-md shadow-md p-4">
+            <div className="flex flex-row items-center gap-3 pb-4 border-b border-zinc-100">
+              <ChartBar size={18} />
+              <p className="font-bold">Latência por execução</p>
+              <span className="ml-2 text-[12px] text-zinc-400">{labelGrafico}</span>
+            </div>
+            <div className="pt-4">
+              <ResponsiveContainer width="100%" height={250}>
+                <BarChart data={dadosGrafico} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
+                  <XAxis dataKey="execucao" tick={{ fontSize: 12, fill: "#6B7280" }} />
+                  <YAxis
+                    tick={{ fontSize: 12, fill: "#6B7280" }}
+                    tickFormatter={(v) => `${v}ms`}
+                  />
+                  <Tooltip
+                    formatter={(value: any) => [`${value} ms`, "latência"]}
+                    contentStyle={{ fontSize: 12, borderRadius: 6 }}
+                  />
+                  <Bar dataKey="latencia" fill="#00BC7D" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
