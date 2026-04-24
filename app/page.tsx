@@ -6,6 +6,8 @@ import { ChartBar, Play, RotateCcw, Clock, FlaskConical } from "lucide-react";
 import Button from "@/src/components/Button";
 import { geracaoDeDados, Registro } from "@/src/utils/generateData";
 import { executar } from "@/src/utils/benchmarks";
+import Historico from "@/src/components/Historico/Historico";
+import ListaResultado from "@/src/components/ListaResultado/ListaResultado";
 
 const GraficoLatencia = dynamic(
   () => import("../src/components/GraficoLatencia/GraficoLatencia"),
@@ -316,72 +318,13 @@ export default function Home() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-5 pt-10 px-3 md:px-5">
-        <div className="h-full lg:col-span-2 bg-[#ffffff] border-none rounded-md shadow-md p-2">
-          <div className="flex flex-row items-center gap-3 pb-2">
-            <ChartBar />
-            <p className="font-bold">Lista de resultado</p>
-            {totalResultados > 0 && (
-              <span className="ml-auto text-[11px] text-zinc-400">
-                exibindo {Math.min(100, totalResultados)} de {totalResultados} registros
-              </span>
-            )}
-          </div>
-
-          <div className="h-[220px] bg-zinc-50 border border-[#E5E7EB] rounded-md overflow-y-auto p-2">
-            <div className="text-[14px] border-b border-zinc-100 py-1">
-              <p>idx | nome | categoria | quantidade | preço</p>
-            </div>
-            {resultados.length === 0 ? (
-              <p className="text-gray-400 text-sm mt-2">Nenhum dado processado.</p>
-            ) : (
-              resultados.map((item) => (
-                <div key={item.idx} className="text-[12px] border-b border-zinc-100 py-1">
-                  {item.idx} | {item.nome} | {item.categoria} | {item.quantidade} | R$ {item.preco.toFixed(2)}
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-
-        <div className="lg:col-span-3 bg-[#ffffff] border-none rounded-md shadow-md p-2">
-          <div className="flex flex-row items-center gap-3 pb-2 border-b border-zinc-100">
-            <Clock size={18} />
-            <p className="font-bold">Histórico de execuções</p>
-          </div>
-
-          <div className="mt-2 flex flex-col gap-1">
-            {historico.length === 0 ? (
-              <p className="text-gray-400 text-sm">Nenhuma execução ainda.</p>
-            ) : (
-              historico.map((h, i) => (
-                <div
-                  key={i}
-                  className={`text-[12px] rounded-md p-2 border ${
-                    i === 0 ? "border-[#00BC7D] bg-green-50" : "border-zinc-100 bg-zinc-50"
-                  }`}
-                >
-                  <div className="flex flex-row flex-wrap items-center gap-2">
-                    <span className="text-zinc-400 font-mono">#{i + 1}</span>
-                    <span className="font-semibold text-zinc-700">{h.estrutura}</span>
-                    <span className="text-zinc-400">|</span>
-                    <span className="text-zinc-600">{h.operacao}</span>
-                    <span className="text-zinc-400">|</span>
-                    <span className="text-zinc-600">{(h.volume / 1000).toFixed(0)}k volume</span>
-                    {i === 0 && (
-                      <span className="ml-auto text-[10px] text-[#00BC7D] font-semibold">
-                        mais recente
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex flex-row flex-wrap gap-4 mt-1 text-zinc-500">
-                    <span>latência: <span className="font-semibold text-zinc-700">{h.latencia}</span></span>
-                    <span>render: <span className="font-semibold text-zinc-700">{h.renderizacao}</span></span>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
+        <ListaResultado 
+          resultados={resultados} 
+          totalResultados={totalResultados} 
+        />
+        <Historico 
+          historico={historico}
+         />
       </div>
 
       {dadosGrafico.length > 0 && (
