@@ -1,11 +1,16 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { ChartBar, Play, RotateCcw, Clock, FlaskConical } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import Button from "@/src/components/Button";
 import { geracaoDeDados, Registro } from "@/src/utils/generateData";
 import { executar } from "@/src/utils/benchmarks";
+
+const GraficoLatencia = dynamic(
+  () => import("../src/components/GraficoLatencia"),
+  { ssr: false }
+);
 
 type Historico = {
   estrutura: string;
@@ -39,6 +44,7 @@ export default function Home() {
   const ultimoTempoFps = useRef<number>(0);
   const isFirstRender = useRef<boolean>(true);
 
+  // --- FPS ---
   useEffect(() => {
     let animationId: number;
 
@@ -59,6 +65,7 @@ export default function Home() {
     return () => cancelAnimationFrame(animationId);
   }, []);
 
+  // --- Tempo de renderização ---
   useLayoutEffect(() => {
     if (isFirstRender.current) {
       isFirstRender.current = false;
@@ -126,6 +133,7 @@ export default function Home() {
     ].slice(0, 5));
   };
 
+  // --- 5x Benchmark ---
   const executarTestes = () => {
     if (!estrutura || !operacao || volumeNumerico === 0) {
       alert("Selecione estrutura, volume e operação!");
@@ -138,11 +146,12 @@ export default function Home() {
     }
 
     const medicoes: number[] = [];
+    let ultimoResultado: Registro[] = [];
 
     for (let i = 0; i < 100; i++) {
       const copiaTeste = [...dadosMestre];
       const t0 = performance.now();
-      executar(estrutura, operacao, copiaTeste, termoBusca);
+      ultimoResultado = executar(estrutura, operacao, copiaTeste, termoBusca);
       const t1 = performance.now();
       medicoes.push(t1 - t0);
     }
@@ -150,15 +159,12 @@ export default function Home() {
     const media = medicoes.reduce((acc, val) => acc + val, 0) / medicoes.length;
     const latenciaMedia = `~${media.toFixed(1)} ms`;
 
-    const copiaTeste = [...dadosMestre];
-    const res = executar(estrutura, operacao, copiaTeste, termoBusca);
-
     setTempoDeResposta(latenciaMedia);
-    setTotalResultados(res.length);
-    setResultados(res.slice(0, 100));
+    setTotalResultados(ultimoResultado.length);
+    setResultados(ultimoResultado.slice(0, 100));
 
     const dados: DadoGrafico[] = medicoes.map((m, i) => ({
-      execucao: `#${i + 1}`,
+      execucao: `${i + 1}`,
       latencia: parseFloat(m.toFixed(1)),
     }));
 
@@ -221,7 +227,7 @@ export default function Home() {
               ))}
               <button
                 onClick={executarBenchmark}
-                className="w-[120px] h-[40px] bg-[#00BC7D] text-white flex flex-row items-center justify-center gap-2 border border-none rounded-md cursor-pointer ml-0 sm:ml-auto p-1"
+                className="w-[120px] h-[40px] bg-[#00BC7D] text-white flex flex-row items-center justify-center gap-2 border border-none rounded-md cursor-pointer p-1 ml-auto"
               >
                 <Play size={16} />
                 Executar
@@ -346,30 +352,7 @@ export default function Home() {
 
       {dadosGrafico.length > 0 && (
         <div className="px-3 md:px-5 pt-5">
-          <div className="bg-[#ffffff] border-none rounded-md shadow-md p-4">
-            <div className="flex flex-row flex-wrap items-center gap-3 pb-4 border-b border-zinc-100">
-              <ChartBar size={18} />
-              <p className="font-bold">Latência por execução</p>
-              <span className="ml-2 text-[12px] text-zinc-400">{labelGrafico}</span>
-            </div>
-            <div className="pt-4">
-              <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={dadosGrafico} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
-                  <XAxis dataKey="execucao" tick={{ fontSize: 12, fill: "#6B7280" }} />
-                  <YAxis
-                    tick={{ fontSize: 12, fill: "#6B7280" }}
-                    tickFormatter={(v) => `${v}ms`}
-                  />
-                  <Tooltip
-                    formatter={(value: any) => [`${value} ms`, "latência"]}
-                    contentStyle={{ fontSize: 12, borderRadius: 6 }}
-                  />
-                  <Bar dataKey="latencia" fill="#00BC7D" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
+          <GraficoLatencia dados={dadosGrafico} label={labelGrafico} />
         </div>
       )}
     </div>
