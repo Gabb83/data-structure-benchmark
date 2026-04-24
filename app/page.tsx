@@ -8,7 +8,7 @@ import { geracaoDeDados, Registro } from "@/src/utils/generateData";
 import { executar } from "@/src/utils/benchmarks";
 
 const GraficoLatencia = dynamic(
-  () => import("../src/components/GraficoLatencia"),
+  () => import("../src/components/GraficoLatencia/GraficoLatencia"),
   { ssr: false }
 );
 
@@ -25,6 +25,20 @@ type DadoGrafico = {
   latencia: number;
 };
 
+type Estatisticas = {
+  media: string;
+  mediana: string;
+  min: string;
+  max: string;
+};
+
+const estatisticasInicial: Estatisticas = {
+  media: "0.0 ms",
+  mediana: "0.0 ms",
+  min: "0.0 ms",
+  max: "0.0 ms",
+};
+
 export default function Home() {
   const [estrutura, setEstrutura] = useState<string | null>(null);
   const [volume, setVolume] = useState<string | null>(null);
@@ -39,6 +53,7 @@ export default function Home() {
   const [dadosGrafico, setDadosGrafico] = useState<DadoGrafico[]>([]);
   const [labelGrafico, setLabelGrafico] = useState<string>("");
   const [fps, setFps] = useState<number>(0);
+  const [estatisticas, setEstatisticas] = useState<Estatisticas>(estatisticasInicial);
 
   const framesRef = useRef<number>(0);
   const ultimoTempoFps = useRef<number>(0);
@@ -133,7 +148,7 @@ export default function Home() {
     ].slice(0, 5));
   };
 
-  // --- 5x Benchmark ---
+  // --- Benchmark ---
   const executarTestes = () => {
     if (!estrutura || !operacao || volumeNumerico === 0) {
       alert("Selecione estrutura, volume e operação!");
@@ -156,12 +171,30 @@ export default function Home() {
       medicoes.push(t1 - t0);
     }
 
+    // --- cálculo das estatísticas ---
+    const ordenadas = [...medicoes].sort((a, b) => a - b);
+
     const media = medicoes.reduce((acc, val) => acc + val, 0) / medicoes.length;
+
+    const mediana = ordenadas.length % 2 === 0
+      ? (ordenadas[ordenadas.length / 2 - 1] + ordenadas[ordenadas.length / 2]) / 2
+      : ordenadas[Math.floor(ordenadas.length / 2)];
+
+    const min = ordenadas[0];
+    const max = ordenadas[ordenadas.length - 1];
+
     const latenciaMedia = `~${media.toFixed(1)} ms`;
 
     setTempoDeResposta(latenciaMedia);
     setTotalResultados(ultimoResultado.length);
     setResultados(ultimoResultado.slice(0, 100));
+
+    setEstatisticas({
+      media: `${media.toFixed(1)} ms`,
+      mediana: `${mediana.toFixed(1)} ms`,
+      min: `${min.toFixed(1)} ms`,
+      max: `${max.toFixed(1)} ms`,
+    });
 
     const dados: DadoGrafico[] = medicoes.map((m, i) => ({
       execucao: `${i + 1}`,
@@ -189,6 +222,7 @@ export default function Home() {
     setTermoBusca("");
     setDadosGrafico([]);
     setLabelGrafico("");
+    setEstatisticas(estatisticasInicial);
     isFirstRender.current = true;
   };
 
@@ -352,7 +386,11 @@ export default function Home() {
 
       {dadosGrafico.length > 0 && (
         <div className="px-3 md:px-5 pt-5">
-          <GraficoLatencia dados={dadosGrafico} label={labelGrafico} />
+          <GraficoLatencia 
+            dados={dadosGrafico} 
+            label={labelGrafico} 
+            estatisticas={estatisticas} 
+          />
         </div>
       )}
     </div>
