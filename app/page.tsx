@@ -173,9 +173,7 @@ export default function Home() {
       medicoes.push(t1 - t0);
     }
 
-    // --- cálculo das estatísticas ---
     const ordenadas = [...medicoes].sort((a, b) => a - b);
-
     const media = medicoes.reduce((acc, val) => acc + val, 0) / medicoes.length;
 
     const mediana = ordenadas.length % 2 === 0
