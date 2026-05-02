@@ -8,10 +8,12 @@ type PropsLista = {
 
 export default function ListaResultado({resultados, totalResultados}: PropsLista) {
   return(
-    <div className="h-full lg:col-span-2 bg-[#ffffff] border-none rounded-md shadow-md p-2">
-      <div className="flex flex-row items-center gap-3 pb-2">
-        <ChartBar />
-        <p className="font-bold">Lista de resultado</p>
+    <div className="h-full lg:col-span-2 bg-[#ffffff] border-none rounded-xl shadow-sm p-5">
+      <div className="flex flex-row items-center gap-3 pb-4 mb-4 border-b border-zinc-100">
+        <div className="p-2 bg-zinc-50 rounded-lg">
+          <ChartBar size={20} className="text-zinc-500"/>
+        </div>
+        <p className="font-bold text-zinc-800 leading-tight">Lista de Resultado</p>
         {totalResultados > 0 && (
           <span className="ml-auto text-[11px] text-zinc-400">
             exibindo {Math.min(100, totalResultados)} de {totalResultados} registros
@@ -19,7 +21,7 @@ export default function ListaResultado({resultados, totalResultados}: PropsLista
         )}
       </div>
 
-      <div className="h-[220px] bg-zinc-50 border border-[#E5E7EB] rounded-md overflow-y-auto p-2">
+      <div className="h-[220px] bg-zinc-50 border border-[#E5E7EB] rounded-xl overflow-y-auto p-2">
         <div className="text-[14px] border-b border-zinc-100 py-1">
           <p>idx | nome | categoria | quantidade | preço</p>
         </div>

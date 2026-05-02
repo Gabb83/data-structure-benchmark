@@ -1,3 +1,4 @@
+import { ChartNoAxesCombined } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 
 type DadoGrafico = {
@@ -21,9 +22,12 @@ type Props = {
 
 export default function GraficoLatencia({ dados, estatisticas, label }: Props) {
   return (
-    <div className="bg-[#ffffff] border-none rounded-md shadow-md p-4">
+    <div className="bg-[#ffffff] border-none rounded-xl shadow-sm p-4">
       <div className="flex flex-row flex-wrap items-center gap-3 pb-4 border-b border-zinc-100">
-        <p className="font-bold">Latência por execução</p>
+        <div className="p-2 bg-violet-50 rounded-lg">
+          <ChartNoAxesCombined size={20} className="text-violet-600" />
+        </div>
+        <p className="font-bold text-zinc-800 leading-tight">Gráfico de Latência por Execução</p>
         <span className="ml-2 text-[12px] text-zinc-400">{label}</span>
       </div>
       <div className="pt-4">

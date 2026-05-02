@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { ChartBar, Play, RotateCcw, Clock, FlaskConical } from "lucide-react";
+import { ChartBar, Play, RotateCcw, Clock, FlaskConical, SquarePercent, Layers } from "lucide-react";
 import Button from "@/src/components/Button";
 import { geracaoDeDados, Registro } from "@/src/utils/generateData";
 import { executar } from "@/src/utils/benchmarks";
@@ -328,8 +328,13 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="bg-[#ffffff] border-none rounded-md shadow-md p-3">
-          <p className="text-zinc-700 font-semibold mb-2">Métricas — Última execução:</p>
+        <div className="bg-[#ffffff] border-none rounded-xl shadow-sm p-5">
+          <div className="flex flex-row items-center gap-3 pb-4 mb-4 border-b border-cyan-50">
+            <div className="p-2 bg-indigo-50 rounded-lg">
+              <Layers size={20} className="text-cyan-600"/>
+            </div>
+            <p className="font-bold text-zinc-800 leading-tight">Métricas – Última Execução</p>
+          </div>
           <div className="flex flex-row flex-wrap gap-2">
             <div className="bg-zinc-50 flex-1 min-w-[140px] h-[150px] border border-[2px] border-[#E5E7EB] rounded-md p-1">
               <p className="text-sm text-zinc-500">tempo de resposta:</p>
@@ -359,7 +364,7 @@ export default function Home() {
           {/* Cabeçalho com ícone e título */}
           <div className="flex flex-row items-center gap-3 pb-4 mb-4 border-b border-zinc-50">
             <div className="p-2 bg-indigo-50 rounded-lg">
-              <Clock size={20} className="text-indigo-600" />
+              <SquarePercent size={20} className="text-indigo-600" />
             </div>
             <div>
               <p className="font-bold text-zinc-800 leading-tight">Análise de Percentis</p>
