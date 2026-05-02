@@ -14,10 +14,14 @@ type PropsHistorico = {
 
 export default function Historico({ historico }: PropsHistorico) {
   return(
-    <div className="lg:col-span-3 bg-[#ffffff] border-none rounded-md shadow-md p-2">
-      <div className="flex flex-row items-center gap-3 pb-2 border-b border-zinc-100">
-        <Clock size={18} />
-        <p className="font-bold">Histórico de execuções</p>
+    <div className="lg:col-span-2 bg-[#ffffff] border-none rounded-xl border border-zinc-100 shadow-sm p-5">
+      <div className="flex flex-row items-center gap-3 pb-4 mb-4 border-b border-zinc-100">
+        <div className="p-2 bg-emerald-50 rounded-lg">
+          <Clock size={20} className="text-emerald-500"/>
+        </div>
+        <div>
+          <p className="font-bold text-zinc-800 leading-tight">Histórico de Execuções</p>
+        </div>
       </div>
 
       <div className="mt-2 flex flex-col gap-1">
