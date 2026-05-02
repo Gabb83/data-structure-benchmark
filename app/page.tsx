@@ -30,6 +30,7 @@ type DadoGrafico = {
 type Estatisticas = {
   media: string;
   mediana: string;
+  desvio: string;
   min: string;
   max: string;
 };
@@ -37,6 +38,7 @@ type Estatisticas = {
 const estatisticasInicial: Estatisticas = {
   media: "0.0 ms",
   mediana: "0.0 ms",
+  desvio: "0.0 ms",
   min: "0.0 ms",
   max: "0.0 ms",
 };
@@ -176,6 +178,14 @@ export default function Home() {
     const ordenadas = [...medicoes].sort((a, b) => a - b);
     const media = medicoes.reduce((acc, val) => acc + val, 0) / medicoes.length;
 
+    const somaDosQuadrados = medicoes.reduce((acc,val) => {
+      return acc + Math.pow(val-media, 2);
+    })
+
+    const variancia = somaDosQuadrados/(medicoes.length-1);
+    const desvioPadrao = Math.sqrt(variancia);
+
+
     const mediana = ordenadas.length % 2 === 0
       ? (ordenadas[ordenadas.length / 2 - 1] + ordenadas[ordenadas.length / 2]) / 2
       : ordenadas[Math.floor(ordenadas.length / 2)];
@@ -192,6 +202,7 @@ export default function Home() {
     setEstatisticas({
       media: `${media.toFixed(1)} ms`,
       mediana: `${mediana.toFixed(1)} ms`,
+      desvio: `${desvioPadrao.toFixed(1)} ms`,
       min: `${min.toFixed(1)} ms`,
       max: `${max.toFixed(1)} ms`,
     });

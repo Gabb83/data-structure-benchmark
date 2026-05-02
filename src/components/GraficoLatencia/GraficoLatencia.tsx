@@ -8,6 +8,7 @@ type DadoGrafico = {
 type Estatisticas = {
   media: string;
   mediana: string;
+  desvio: string;
   min: string;
   max: string;
 };
@@ -47,6 +48,10 @@ export default function GraficoLatencia({ dados, estatisticas, label }: Props) {
         <div className="bg-zinc-50 flex-1 min-w-[120px] border border-[2px] border-[#E5E7EB] rounded-md p-2">
           <p className="text-xs text-zinc-500">mediana</p>
           <p className="text-base text-zinc-700 font-bold">{estatisticas.mediana}</p>
+        </div>
+        <div className="bg-zinc-50 flex-1 min-w-[120px] border border-[2px] border-[#00afbc] rounded-md p-2">
+          <p className="text-xs text-zinc-500">desvio padrão</p>
+          <p className="text-base text-[#00afbc] font-bold">{estatisticas.desvio}</p>
         </div>
         <div className="bg-zinc-50 flex-1 min-w-[120px] border border-[2px] border-[#00BC7D] rounded-md p-2">
           <p className="text-xs text-zinc-500">mínimo</p>
