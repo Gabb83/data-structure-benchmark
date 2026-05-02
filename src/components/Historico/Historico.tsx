@@ -14,7 +14,7 @@ type PropsHistorico = {
 
 export default function Historico({ historico }: PropsHistorico) {
   return(
-    <div className="lg:col-span-3 bg-[#ffffff] border-none rounded-md shadow-md p-2">
+    <div className="lg:col-span-2 bg-[#ffffff] border-none rounded-md shadow-md p-2">
       <div className="flex flex-row items-center gap-3 pb-2 border-b border-zinc-100">
         <Clock size={18} />
         <p className="font-bold">Histórico de execuções</p>

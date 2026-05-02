@@ -33,6 +33,9 @@ type Estatisticas = {
   desvio: string;
   min: string;
   max: string;
+  p99: string;
+  p95: string;
+  p90: string;
 };
 
 const estatisticasInicial: Estatisticas = {
@@ -41,6 +44,9 @@ const estatisticasInicial: Estatisticas = {
   desvio: "0.0 ms",
   min: "0.0 ms",
   max: "0.0 ms",
+  p99: "0.0ms",
+  p95: "0.0ms",
+  p90: "0.0ms",
 };
 
 export default function Home() {
@@ -185,13 +191,25 @@ export default function Home() {
     const variancia = somaDosQuadrados/(medicoes.length-1);
     const desvioPadrao = Math.sqrt(variancia);
 
-
     const mediana = ordenadas.length % 2 === 0
       ? (ordenadas[ordenadas.length / 2 - 1] + ordenadas[ordenadas.length / 2]) / 2
       : ordenadas[Math.floor(ordenadas.length / 2)];
 
     const min = ordenadas[0];
     const max = ordenadas[ordenadas.length - 1];
+
+    const calcular99Percentual = (dadosOrdenados: number[], percentil: number) => {
+      const index = Math.ceil((percentil / 100) * dadosOrdenados.length) - 1;
+      return dadosOrdenados[index];
+    };
+
+    const p90 = calcular99Percentual(ordenadas, 90);
+    const p95 = calcular99Percentual(ordenadas, 95);
+    const p99 = calcular99Percentual(ordenadas, 99);
+
+    console.log(`No pior cenário (P99), a latência foi de ${p99.toFixed(1)} ms`);
+    console.log(`No pior cenário (P95), a latência foi de ${p95.toFixed(1)} ms`);
+    console.log(`No pior cenário (P90), a latência foi de ${p90.toFixed(1)} ms`);
 
     const latenciaMedia = `~${media.toFixed(1)} ms`;
 
@@ -205,6 +223,9 @@ export default function Home() {
       desvio: `${desvioPadrao.toFixed(1)} ms`,
       min: `${min.toFixed(1)} ms`,
       max: `${max.toFixed(1)} ms`,
+      p99: `${p99.toFixed(1)} ms`,
+      p95: `${p95.toFixed(1)} ms`,
+      p90: `${p90.toFixed(1)} ms`,
     });
 
     const dados: DadoGrafico[] = medicoes.map((m, i) => ({
@@ -326,14 +347,63 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-5 pt-10 px-3 md:px-5">
+      <div className="grid grid-cols-1 lg:grid-cols-6 gap-5 pt-10 px-3 md:px-5">
         <ListaResultado 
           resultados={resultados} 
           totalResultados={totalResultados} 
         />
         <Historico 
           historico={historico}
-         />
+        />
+        <div className="lg:col-span-2 bg-white border-none rounded-xl shadow-sm p-5 border border-zinc-100">
+          {/* Cabeçalho com ícone e título */}
+          <div className="flex flex-row items-center gap-3 pb-4 mb-4 border-b border-zinc-50">
+            <div className="p-2 bg-indigo-50 rounded-lg">
+              <Clock size={20} className="text-indigo-600" />
+            </div>
+            <div>
+              <p className="font-bold text-zinc-800 leading-tight">Análise de Percentis</p>
+            </div>
+          </div>
+
+          {/* Lista de métricas */}
+          <div className="space-y-3">
+            {/* P99 - Destaque por ser o cenário crítico */}
+            <div className="flex items-center justify-between p-3 rounded-lg bg-indigo-50/50 border border-indigo-100/50">
+              <div className="flex flex-col">
+                <span className="font-bold text-[#6366F1]">P99</span>
+              </div>
+              <p className="text-lg font-bold text-[#6366F1] tracking-tight">
+                {estatisticas.p99}
+              </p>
+            </div>
+
+            {/* P95 */}
+            <div className="flex items-center justify-between p-3 rounded-lg bg-zinc-50 border border-zinc-100">
+              <div className="flex flex-col">
+                <span className="font-bold text-zinc-600">P95</span>
+              </div>
+              <p className="text-base font-semibold text-zinc-800">
+                {estatisticas.p95}
+              </p>
+            </div>
+
+            {/* P90 */}
+            <div className="flex items-center justify-between p-3 rounded-lg bg-zinc-50 border border-zinc-100">
+              <div className="flex flex-col">
+                <span className="font-bold text-zinc-600">P90</span>
+              </div>
+              <p className="text-base font-semibold text-zinc-800">
+                {estatisticas.p90}
+              </p>
+            </div>
+          </div>
+
+          {/* Nota de rodapé explicativa */}
+          <p className="text-[10px] text-zinc-400 mt-4 leading-relaxed italic">
+            * Indica que X% das execuções foram concluídas dentro deste tempo.
+          </p>
+        </div>
       </div>
 
       {dadosGrafico.length > 0 && (
