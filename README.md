@@ -1,6 +1,18 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<!-- This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app). -->
 
-## Benchmark de Estruturas de Dados 🇧🇷/🇵🇹
+## Data Structures Benchmark 🇺🇸 / 🇬🇧
+
+This project consists of an experimental environment developed to compare and analyze the real impact of different data structures in terms of performance and user experience within the application layer (front-end).
+
+The goal is to provide practical insights on how the choice of data structure can influence the performance and usability of an application, allowing developers to make informed decisions when designing their solutions.
+
+## Technologies and Metodology
+
+* Stack: Next.js, TypeScript, Tailwind CSS and Vercel (Deploy).
+* Data Structures: Array, Binary Tree, AVL Tree, Map, Set and Hashmap.
+* Performance Metrics: Response time latency (ms), rendering time (ms), frames per second (FPS) and stability statistical analysis (Percentiles P90, P95, P99 and Standart Deviation).
+
+## Benchmark de Estruturas de Dados 🇧🇷 / 🇵🇹
 
 Este projeto consiste em um ambiente experimental desenvolvido para comparar e analisar o impacto real de diferentes estruturas de dados em termos de performance e experiência do usuário dentro da camada de aplicação (front-end). 
 
@@ -13,7 +25,7 @@ O objetivo é fornecer insights práticos sobre como a escolha da estrutura de d
 * Estruturas de Dados: Array, Árvore Binária, Árvore AVL, Map, Set e Hashmap.
 
 * Métricas de Performance: Latência de tempo de resposta (ms), tempo de renderização (ms), quadros por segundo (FPS) e análise estátisticas de estabilidade (Percentis P90, P95, P99 e Desvio Padrão).
- 
+<!--  
 
 ## Getting Started
 
@@ -39,4 +51,4 @@ This project uses [`next/font`](https://nextjs.org/docs/app/building-your-applic
 
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details. -->
