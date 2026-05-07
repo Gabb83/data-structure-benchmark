@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { Play, RotateCcw, FlaskConical, SquarePercent, Layers, Settings } from "lucide-react";
+import { Play, RotateCcw, FlaskConical, SquarePercent, Layers, Settings, MemoryStick } from "lucide-react";
 import Button from "@/src/components/Button";
 import { geracaoDeDados, Registro } from "@/src/utils/generateData";
 import { executar } from "@/src/utils/benchmarks";
@@ -64,6 +64,9 @@ export default function Home() {
   const [labelGrafico, setLabelGrafico] = useState<string>("");
   const [fps, setFps] = useState<number>(0);
   const [estatisticas, setEstatisticas] = useState<Estatisticas>(estatisticasInicial);
+  
+  const [memoryHeap, setMemoryHeap] = useState<string>("0.0 KB");
+  const [memoryHeapPeak, setMemoryHeapPeak] = useState<string>("0.0 KB");
 
   const framesRef = useRef<number>(0);
   const ultimoTempoFps = useRef<number>(0);
@@ -89,6 +92,26 @@ export default function Home() {
     animationId = requestAnimationFrame(calcularFps);
     return () => cancelAnimationFrame(animationId);
   }, []);
+
+  const formatBytes = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`;
+    return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
+  };
+
+  const obterMemoriaHeap = () => {
+    if ("memory" in performance) {
+      const memory = (performance as any).memory;
+
+      return {
+        used: memory.usedJSHeapSize,
+        total: memory.totalJSHeapSize,
+        limit: memory.jsHeapSizeLimit,
+      };
+    }
+
+    return null;
+  };
 
   // --- Tempo de renderização ---
   useLayoutEffect(() => {
@@ -129,6 +152,15 @@ export default function Home() {
     return geracaoDeDados(volumeNumerico);
   }, [volumeNumerico]);
 
+  const medirMemoria = (antes: any, depois: any) => {
+    if (!antes || !depois) return;
+
+    const delta = depois.used - antes.used;
+
+    setMemoryHeap(formatBytes(delta));
+    setMemoryHeapPeak(formatBytes(depois.used));
+  };
+
   const executarBenchmark = () => {
     if (!estrutura || !operacao || volumeNumerico === 0) {
       alert("Selecione estrutura, volume e operação!");
@@ -140,11 +172,15 @@ export default function Home() {
       return;
     }
 
+    const memoriaAntes = obterMemoriaHeap();
     const copiaTeste = [...dadosMestre];
 
     const t0 = performance.now();
     const res = executar(estrutura, operacao, copiaTeste, termoBusca);
     const t1 = performance.now();
+
+    const memoriaDepois = obterMemoriaHeap();
+    medirMemoria(memoriaAntes, memoriaDepois);
 
     const latencia = `${(t1 - t0).toFixed(1)} ms`;
 
@@ -173,6 +209,8 @@ export default function Home() {
     const medicoes: number[] = [];
     let ultimoResultado: Registro[] = [];
 
+    const memoriaAntes = obterMemoriaHeap();
+
     for (let i = 0; i < 100; i++) {
       const copiaTeste = [...dadosMestre];
       const t0 = performance.now();
@@ -180,6 +218,9 @@ export default function Home() {
       const t1 = performance.now();
       medicoes.push(t1 - t0);
     }
+
+    const memoriaDepois = obterMemoriaHeap();
+    medirMemoria(memoriaAntes, memoriaDepois);
 
     const ordenadas = [...medicoes].sort((a, b) => a - b);
     const media = medicoes.reduce((acc, val) => acc + val, 0) / medicoes.length;
@@ -256,6 +297,8 @@ export default function Home() {
     setLabelGrafico("");
     setEstatisticas(estatisticasInicial);
     isFirstRender.current = true;
+    setMemoryHeap("0.0 KB");
+    setMemoryHeapPeak("0.0 KB");
   };
 
   return (
@@ -421,6 +464,7 @@ export default function Home() {
         </div>
       </div>
 
+
       {dadosGrafico.length > 0 && (
         <div className="px-3 md:px-5 pt-5">
           <GraficoLatencia 
@@ -428,6 +472,23 @@ export default function Home() {
             label={labelGrafico} 
             estatisticas={estatisticas} 
           />
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-5">
+            <div className="bg-white p-4 rounded-xl shadow-sm border-none">
+              <p className="text-sm text-zinc-500">Heap utilizado</p>
+              <div className="flex items-center gap-2 mt-2">
+                <MemoryStick size={18} />
+                <p className="font-bold">{memoryHeap}</p>
+              </div>
+            </div>
+            <div className="bg-white p-4 rounded-xl shadow-sm border-none">
+              <p className="text-sm text-zinc-500">Heap total/pico</p>
+              <div className="flex items-center gap-2 mt-2">
+                <MemoryStick size={18} />
+                <p className="font-bold">{memoryHeapPeak}</p>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
