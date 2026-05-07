@@ -340,21 +340,21 @@ export default function Home() {
               ))}
               <button
                 onClick={executarBenchmark}
-                className="w-[120px] h-[40px] bg-[#00BC7D] text-white flex text-sm flex-row items-center justify-center gap-2 border border-none rounded-md cursor-pointer p-1 ml-auto"
+                className="w-30 h-10 bg-[#00BC7D] text-white flex text-sm flex-row items-center justify-center gap-2 border border-none rounded-md cursor-pointer p-1 ml-auto"
               >
                 <Play size={16} />
                 Executar
               </button>
               <button
                 onClick={executarTestes}
-                className="w-[140px] h-[40px] bg-[#6366F1] text-white text-sm flex flex-row items-center justify-center gap-2 border border-none rounded-md cursor-pointer p-1"
+                className="w-35 h-10 bg-[#6366F1] text-white text-sm flex flex-row items-center justify-center gap-2 border border-none rounded-md cursor-pointer p-1"
               >
                 <FlaskConical size={16} />
                 Benchmark
               </button>
               <button
                 onClick={zerarAmbiente}
-                className="w-[120px] h-[40px] bg-[#FC959A] text-white text-sm flex flex-row items-center justify-center gap-2 border border-none rounded-md cursor-pointer p-1"
+                className="w-30 h-10 bg-[#FC959A] text-white text-sm flex flex-row items-center justify-center gap-2 border border-none rounded-md cursor-pointer p-1"
               >
                 <RotateCcw size={16} />
                 Zerar
@@ -368,7 +368,7 @@ export default function Home() {
                   onChange={(e) => setTermoBusca(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && executarBenchmark()}
                   placeholder={operacao === "Busca" ? "Digite o idx para buscar..." : "Digite a categoria para filtragem..."}
-                  className="w-full max-w-[290px] text-sm border border-zinc-300 rounded-md px-3 py-2 mt-4"
+                  className="w-full max-w-72.5 text-sm border border-zinc-300 rounded-md px-3 py-2 mt-4"
                 />
               )}
             </div>
@@ -393,7 +393,7 @@ export default function Home() {
                 <p className="text-md text-zinc-700 font-semibold break-all">{tempoRenderizacao}</p>
               </div>
             </div>
-            <div className="bg-zinc-50 w-full h-[150px] border border-[#E5E7EB] rounded-lg p-2">
+            <div className="bg-zinc-50 w-full h-37.5 border border-[#E5E7EB] rounded-lg p-2">
               <p className="text-sm text-zinc-500 pb-2">taxa de quadros FPS:</p>
               <p className="text-md text-zinc-700 font-semibold">{fps} fps</p>
             </div>

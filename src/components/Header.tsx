@@ -1,6 +1,6 @@
 export default function Header() {
   return(
-    <header className="bg-[#ffffff] px-5 py-3.25 flex items-center gap-3.5 mb-5">
+    <header className="bg-[#ffffff] px-5 py-3.25 flex items-center gap-3.5 shadow-sm mb-5">
       <div className="flex items-center gap-1.75">
         <span className="w-2.75 h-2.75 rounded-full bg-[#e24b4a] inline-block" />
         <span className="w-2.75 h-2.75 rounded-full bg-[#ef9f27] inline-block" />
@@ -21,7 +21,7 @@ export default function Header() {
         </p>
       </div>
  
-      <div className="ml-auto flex items-center gap-2">
+      <div className="ml-auto hidden md:flex items-center gap-2">
         <span className="text-[11px] font-mono font-medium px-2.5 py-0.75 rounded bg-[rgba(29,158,117,0.15)] text-[#549982] border border-[rgba(93,202,165,0.3)]">
           ● live
         </span>

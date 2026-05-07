@@ -21,7 +21,7 @@ export default function ListaResultado({resultados, totalResultados}: PropsLista
         )}
       </div>
 
-      <div className="h-[220px] bg-zinc-50 border border-[#E5E7EB] rounded-xl overflow-y-auto p-2">
+      <div className="h-55 bg-zinc-50 border border-[#E5E7EB] rounded-xl overflow-y-auto p-2">
         <div className="text-[14px] border-b border-zinc-100 py-1">
           <p>idx | nome | categoria | quantidade | preço</p>
         </div>
