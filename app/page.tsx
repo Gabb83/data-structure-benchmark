@@ -8,6 +8,7 @@ import { geracaoDeDados, Registro } from "@/src/utils/generateData";
 import { executar } from "@/src/utils/benchmarks";
 import Historico from "@/src/components/Historico/Historico";
 import ListaResultado from "@/src/components/ListaResultado/ListaResultado";
+import Header from "@/src/components/Header";
 
 const GraficoLatencia = dynamic(
   () => import("../src/components/GraficoLatencia/GraficoLatencia"),
@@ -303,10 +304,7 @@ export default function Home() {
 
   return (
     <div className="bg-[#F9FAFB] pb-5 min-h-screen">
-      <div className="bg-[#222222] text-[#ffffff] pt-2 mb-6 p-3">
-        <p className="text-[18px] font-semibold">Data Structure Benchmark — MVP</p>
-        <p className="text-sm">ambiente de teste • Next.js | TypeScript</p>
-      </div>
+      <Header />
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-5 px-3 md:px-5">
         <div className="lg:col-span-3 bg-white border-none rounded-xl shadow-sm p-5 border border-zinc-100">
@@ -472,7 +470,7 @@ export default function Home() {
             label={labelGrafico} 
             estatisticas={estatisticas} 
           />
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-5">
             <div className="bg-white p-4 rounded-xl shadow-sm border-none">
               <p className="text-sm text-zinc-500">Heap utilizado</p>
