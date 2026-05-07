@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { ChartBar, Play, RotateCcw, Clock, FlaskConical, SquarePercent, Layers } from "lucide-react";
+import { Play, RotateCcw, FlaskConical, SquarePercent, Layers, Settings } from "lucide-react";
 import Button from "@/src/components/Button";
 import { geracaoDeDados, Registro } from "@/src/utils/generateData";
 import { executar } from "@/src/utils/benchmarks";
@@ -265,10 +265,16 @@ export default function Home() {
         <p className="text-sm">ambiente de teste • Next.js | TypeScript</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 px-3 md:px-5">
-        <div>
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-5 px-3 md:px-5">
+        <div className="lg:col-span-3 bg-white border-none rounded-xl shadow-sm p-5 border border-zinc-100">
+          <div className="flex flex-row items-center gap-3 pb-4 mb-4 border-b border-gray-50">
+            <div className="p-2 bg-gray-50 rounded-lg">
+              <Settings size={20} className="text-gray-600"/>
+            </div>
+            <h2 className="font-bold text-zinc-800 leading-tight">Configuração de Ambiente</h2>
+          </div>
           <div>
-            <p className="border-b-[1.5px] border-zinc-200 mb-3">Estrutura de dados:</p>
+            <p className="text-sm border-b-[1.5px] border-zinc-200 mb-3">Estrutura de dados:</p>
             <div className="flex flex-row flex-wrap gap-2">
               {estruturas.map((item) => (
                 <Button key={item} nome={item} selecionado={estrutura === item} onClick={() => setEstrutura(item)} />
@@ -277,7 +283,7 @@ export default function Home() {
           </div>
 
           <div className="pt-4">
-            <p className="border-b-[1.5px] border-zinc-200 mb-3">Volume de dados:</p>
+            <p className="text-sm border-b-[1.5px] border-zinc-200 mb-3">Volume de dados:</p>
             <div className="flex flex-row flex-wrap gap-2">
               {volumes.map((item) => (
                 <Button key={item} nome={item} selecionado={volume === item} onClick={() => setVolume(item)} />
@@ -286,28 +292,28 @@ export default function Home() {
           </div>
 
           <div className="pt-4">
-            <p className="border-b-[1.5px] border-zinc-200 mb-3">Operações:</p>
+            <p className="text-sm border-b-[1.5px] border-zinc-200 mb-3">Operações:</p>
             <div className="flex flex-row flex-wrap gap-2">
               {operacoes.map((item) => (
                 <Button key={item} nome={item} selecionado={operacao === item} onClick={() => setOperacao(item)} />
               ))}
               <button
                 onClick={executarBenchmark}
-                className="w-[120px] h-[40px] bg-[#00BC7D] text-white flex flex-row items-center justify-center gap-2 border border-none rounded-md cursor-pointer p-1 ml-auto"
+                className="w-[120px] h-[40px] bg-[#00BC7D] text-white flex text-sm flex-row items-center justify-center gap-2 border border-none rounded-md cursor-pointer p-1 ml-auto"
               >
                 <Play size={16} />
                 Executar
               </button>
               <button
                 onClick={executarTestes}
-                className="w-[140px] h-[40px] bg-[#6366F1] text-white flex flex-row items-center justify-center gap-2 border border-none rounded-md cursor-pointer p-1"
+                className="w-[140px] h-[40px] bg-[#6366F1] text-white text-sm flex flex-row items-center justify-center gap-2 border border-none rounded-md cursor-pointer p-1"
               >
                 <FlaskConical size={16} />
                 Benchmark
               </button>
               <button
                 onClick={zerarAmbiente}
-                className="w-[120px] h-[40px] bg-[#FC959A] text-white flex flex-row items-center justify-center gap-2 border border-none rounded-md cursor-pointer p-1"
+                className="w-[120px] h-[40px] bg-[#FC959A] text-white text-sm flex flex-row items-center justify-center gap-2 border border-none rounded-md cursor-pointer p-1"
               >
                 <RotateCcw size={16} />
                 Zerar
@@ -328,38 +334,42 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="bg-[#ffffff] border-none rounded-xl shadow-sm p-5">
+        <div className="lg:col-span-2 bg-[#ffffff] border-none rounded-xl shadow-sm p-5">
           <div className="flex flex-row items-center gap-3 pb-4 mb-4 border-b border-cyan-50">
             <div className="p-2 bg-indigo-50 rounded-lg">
               <Layers size={20} className="text-cyan-600"/>
             </div>
             <p className="font-bold text-zinc-800 leading-tight">Métricas – Última Execução</p>
           </div>
-          <div className="flex flex-row flex-wrap gap-2">
-            <div className="bg-zinc-50 flex-1 min-w-[140px] h-[150px] border border-[2px] border-[#E5E7EB] rounded-md p-1">
-              <p className="text-sm text-zinc-500">tempo de resposta:</p>
-              <p className="text-lg text-zinc-700 font-bold break-all">{tempoDeResposta}</p>
+          <div className="flex flex-col gap-2">
+            <div className="flex flex-row gap-2">
+              <div className="bg-zinc-50 flex-1 border border-[#E5E7EB] rounded-lg p-2">
+                <p className="text-sm text-zinc-500 pb-2">tempo de resposta:</p>
+                <p className="text-md text-zinc-700 font-semibold break-all">{tempoDeResposta}</p>
+              </div>
+              <div className="bg-zinc-50 flex-1 border border-[#E5E7EB] rounded-lg p-2">
+                <p className="text-sm text-zinc-500 pb-2">tempo de renderização:</p>
+                <p className="text-md text-zinc-700 font-semibold break-all">{tempoRenderizacao}</p>
+              </div>
             </div>
-            <div className="bg-zinc-50 flex-1 min-w-[140px] h-[150px] border border-[2px] border-[#E5E7EB] rounded-md p-1">
-              <p className="text-sm text-zinc-500">tempo de renderização:</p>
-              <p className="text-lg text-zinc-700 font-bold break-all">{tempoRenderizacao}</p>
-            </div>
-            <div className="bg-zinc-50 flex-1 min-w-[140px] h-[150px] border border-[2px] border-[#E5E7EB] rounded-md p-1">
-              <p className="text-sm text-zinc-500">taxa de quadros FPS:</p>
-              <p className="text-lg text-zinc-700 font-bold">{fps} fps</p>
+            <div className="bg-zinc-50 w-full h-[150px] border border-[#E5E7EB] rounded-lg p-2">
+              <p className="text-sm text-zinc-500 pb-2">taxa de quadros FPS:</p>
+              <p className="text-md text-zinc-700 font-semibold">{fps} fps</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-6 gap-5 pt-10 px-3 md:px-5">
+      <div className="grid grid-cols-1 lg:grid-cols-6 gap-5 pt-5 px-3 md:px-5">
         <ListaResultado 
           resultados={resultados} 
           totalResultados={totalResultados} 
         />
+
         <Historico 
           historico={historico}
         />
+        
         <div className="lg:col-span-2 bg-white border-none rounded-xl shadow-sm p-5 border border-zinc-100">
           {/* Cabeçalho com ícone e título */}
           <div className="flex flex-row items-center gap-3 pb-4 mb-4 border-b border-zinc-50">
