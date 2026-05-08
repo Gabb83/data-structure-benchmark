@@ -9,6 +9,8 @@ import { executar } from "@/src/utils/benchmarks";
 import Historico from "@/src/components/Historico/Historico";
 import ListaResultado from "@/src/components/ListaResultado/ListaResultado";
 import Header from "@/src/components/Header";
+import AnalisePercentis from "@/src/components/AnalisesPercentis/AnalisePercentis";
+import Metricas from "@/src/components/Metricas/Metricas";
 
 const GraficoLatencia = dynamic(
   () => import("../src/components/GraficoLatencia/GraficoLatencia"),
@@ -322,7 +324,6 @@ export default function Home() {
               ))}
             </div>
           </div>
-
           <div className="pt-4">
             <p className="text-sm border-b-[1.5px] border-zinc-200 mb-3">Volume de dados:</p>
             <div className="flex flex-row flex-wrap gap-2">
@@ -331,7 +332,6 @@ export default function Home() {
               ))}
             </div>
           </div>
-
           <div className="pt-4">
             <p className="text-sm border-b-[1.5px] border-zinc-200 mb-3">Operações:</p>
             <div className="flex flex-row flex-wrap gap-2">
@@ -375,93 +375,18 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="lg:col-span-2 bg-[#ffffff] border-none rounded-xl shadow-sm p-5">
-          <div className="flex flex-row items-center gap-3 pb-4 mb-4 border-b border-cyan-50">
-            <div className="p-2 bg-indigo-50 rounded-lg">
-              <Layers size={20} className="text-cyan-600"/>
-            </div>
-            <p className="font-bold text-zinc-800 leading-tight">Métricas – Última Execução</p>
-          </div>
-          <div className="flex flex-col gap-2">
-            <div className="flex flex-row gap-2">
-              <div className="bg-zinc-50 flex-1 border border-[#E5E7EB] rounded-lg p-2">
-                <p className="text-sm text-zinc-500 pb-2">tempo de resposta:</p>
-                <p className="text-md text-zinc-700 font-semibold break-all">{tempoDeResposta}</p>
-              </div>
-              <div className="bg-zinc-50 flex-1 border border-[#E5E7EB] rounded-lg p-2">
-                <p className="text-sm text-zinc-500 pb-2">tempo de renderização:</p>
-                <p className="text-md text-zinc-700 font-semibold break-all">{tempoRenderizacao}</p>
-              </div>
-            </div>
-            <div className="bg-zinc-50 w-full h-37.5 border border-[#E5E7EB] rounded-lg p-2">
-              <p className="text-sm text-zinc-500 pb-2">taxa de quadros FPS:</p>
-              <p className="text-md text-zinc-700 font-semibold">{fps} fps</p>
-            </div>
-          </div>
-        </div>
+        <Metricas 
+          tempoDeResposta={tempoDeResposta}
+          tempoDeRenderizacao={tempoRenderizacao}
+          fps={fps}
+        />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-6 gap-5 pt-5 px-3 md:px-5">
-        <ListaResultado 
-          resultados={resultados} 
-          totalResultados={totalResultados} 
-        />
-
-        <Historico 
-          historico={historico}
-        />
-        
-        <div className="lg:col-span-2 bg-white border-none rounded-xl shadow-sm p-5 border border-zinc-100">
-          {/* Cabeçalho com ícone e título */}
-          <div className="flex flex-row items-center gap-3 pb-4 mb-4 border-b border-zinc-50">
-            <div className="p-2 bg-indigo-50 rounded-lg">
-              <SquarePercent size={20} className="text-indigo-600" />
-            </div>
-            <div>
-              <p className="font-bold text-zinc-800 leading-tight">Análise de Percentis</p>
-            </div>
-          </div>
-
-          {/* Lista de métricas */}
-          <div className="space-y-3">
-            {/* P99 - Destaque por ser o cenário crítico */}
-            <div className="flex items-center justify-between p-3 rounded-lg bg-indigo-50/50 border border-indigo-100/50">
-              <div className="flex flex-col">
-                <span className="font-bold text-[#6366F1]">P99</span>
-              </div>
-              <p className="text-lg font-bold text-[#6366F1] tracking-tight">
-                {estatisticas.p99}
-              </p>
-            </div>
-
-            {/* P95 */}
-            <div className="flex items-center justify-between p-3 rounded-lg bg-zinc-50 border border-zinc-100">
-              <div className="flex flex-col">
-                <span className="font-bold text-zinc-600">P95</span>
-              </div>
-              <p className="text-base font-semibold text-zinc-800">
-                {estatisticas.p95}
-              </p>
-            </div>
-
-            {/* P90 */}
-            <div className="flex items-center justify-between p-3 rounded-lg bg-zinc-50 border border-zinc-100">
-              <div className="flex flex-col">
-                <span className="font-bold text-zinc-600">P90</span>
-              </div>
-              <p className="text-base font-semibold text-zinc-800">
-                {estatisticas.p90}
-              </p>
-            </div>
-          </div>
-
-          {/* Nota de rodapé explicativa */}
-          <p className="text-[10px] text-zinc-400 mt-4 leading-relaxed italic">
-            * Indica que X% das execuções foram concluídas dentro deste tempo.
-          </p>
-        </div>
+        <ListaResultado resultados={resultados} totalResultados={totalResultados} />
+        <Historico historico={historico} />
+        <AnalisePercentis estatisticas={estatisticas} />
       </div>
-
 
       {dadosGrafico.length > 0 && (
         <div className="px-3 md:px-5 pt-5">
