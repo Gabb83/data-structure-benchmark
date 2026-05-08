@@ -45,23 +45,23 @@ export default function GraficoLatencia({ dados, estatisticas, label }: Props) {
         </ResponsiveContainer>
       </div>
       <div className="flex flex-row flex-wrap gap-2">
-        <div className="bg-zinc-50 flex-1 min-w-[120px] border border-[2px] border-[#E5E7EB] rounded-md p-2">
+        <div className="bg-zinc-50 flex-1 min-w-30 border-2 border-[#E5E7EB] rounded-md p-2">
           <p className="text-xs text-zinc-500">média</p>
           <p className="text-base text-zinc-700 font-bold">{estatisticas.media}</p>
         </div>
-        <div className="bg-zinc-50 flex-1 min-w-[120px] border border-[2px] border-[#E5E7EB] rounded-md p-2">
+        <div className="bg-zinc-50 flex-1 min-w-30 border-2 border-[#E5E7EB] rounded-md p-2">
           <p className="text-xs text-zinc-500">mediana</p>
           <p className="text-base text-zinc-700 font-bold">{estatisticas.mediana}</p>
         </div>
-        <div className="bg-zinc-50 flex-1 min-w-[120px] border border-[2px] border-[#00afbc] rounded-md p-2">
+        <div className="bg-zinc-50 flex-1 min-w-30 border-2 border-[#00afbc] rounded-md p-2">
           <p className="text-xs text-zinc-500">desvio padrão</p>
           <p className="text-base text-[#00afbc] font-bold">{estatisticas.desvio}</p>
         </div>
-        <div className="bg-zinc-50 flex-1 min-w-[120px] border border-[2px] border-[#00BC7D] rounded-md p-2">
+        <div className="bg-zinc-50 flex-1 min-w-30 border-2 border-[#00BC7D] rounded-md p-2">
           <p className="text-xs text-zinc-500">mínimo</p>
           <p className="text-base text-[#00BC7D] font-bold">{estatisticas.min}</p>
         </div>
-        <div className="bg-zinc-50 flex-1 min-w-[120px] border border-[2px] border-[#FC959A] rounded-md p-2">
+        <div className="bg-zinc-50 flex-1 min-w-30 border-2 border-[#FC959A] rounded-md p-2">
           <p className="text-xs text-zinc-500">máximo</p>
           <p className="text-base text-[#FC959A] font-bold">{estatisticas.max}</p>
         </div>

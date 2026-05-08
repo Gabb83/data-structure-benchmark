@@ -2,12 +2,15 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { ChartBar, Play, RotateCcw, Clock, FlaskConical, SquarePercent, Layers } from "lucide-react";
+import { Play, RotateCcw, FlaskConical, SquarePercent, Layers, Settings, MemoryStick } from "lucide-react";
 import Button from "@/src/components/Button";
 import { geracaoDeDados, Registro } from "@/src/utils/generateData";
 import { executar } from "@/src/utils/benchmarks";
 import Historico from "@/src/components/Historico/Historico";
 import ListaResultado from "@/src/components/ListaResultado/ListaResultado";
+import Header from "@/src/components/Header";
+import AnalisePercentis from "@/src/components/AnalisesPercentis/AnalisePercentis";
+import Metricas from "@/src/components/Metricas/Metricas";
 
 const GraficoLatencia = dynamic(
   () => import("../src/components/GraficoLatencia/GraficoLatencia"),
@@ -64,6 +67,9 @@ export default function Home() {
   const [labelGrafico, setLabelGrafico] = useState<string>("");
   const [fps, setFps] = useState<number>(0);
   const [estatisticas, setEstatisticas] = useState<Estatisticas>(estatisticasInicial);
+  
+  const [memoryHeap, setMemoryHeap] = useState<string>("0.0 KB");
+  const [memoryHeapPeak, setMemoryHeapPeak] = useState<string>("0.0 KB");
 
   const framesRef = useRef<number>(0);
   const ultimoTempoFps = useRef<number>(0);
@@ -89,6 +95,26 @@ export default function Home() {
     animationId = requestAnimationFrame(calcularFps);
     return () => cancelAnimationFrame(animationId);
   }, []);
+
+  const formatBytes = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(2)} KB`;
+    return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
+  };
+
+  const obterMemoriaHeap = () => {
+    if ("memory" in performance) {
+      const memory = (performance as any).memory;
+
+      return {
+        used: memory.usedJSHeapSize,
+        total: memory.totalJSHeapSize,
+        limit: memory.jsHeapSizeLimit,
+      };
+    }
+
+    return null;
+  };
 
   // --- Tempo de renderização ---
   useLayoutEffect(() => {
@@ -129,6 +155,15 @@ export default function Home() {
     return geracaoDeDados(volumeNumerico);
   }, [volumeNumerico]);
 
+  const medirMemoria = (antes: any, depois: any) => {
+    if (!antes || !depois) return;
+
+    const delta = depois.used - antes.used;
+
+    setMemoryHeap(formatBytes(delta));
+    setMemoryHeapPeak(formatBytes(depois.used));
+  };
+
   const executarBenchmark = () => {
     if (!estrutura || !operacao || volumeNumerico === 0) {
       alert("Selecione estrutura, volume e operação!");
@@ -140,11 +175,15 @@ export default function Home() {
       return;
     }
 
+    const memoriaAntes = obterMemoriaHeap();
     const copiaTeste = [...dadosMestre];
 
     const t0 = performance.now();
     const res = executar(estrutura, operacao, copiaTeste, termoBusca);
     const t1 = performance.now();
+
+    const memoriaDepois = obterMemoriaHeap();
+    medirMemoria(memoriaAntes, memoriaDepois);
 
     const latencia = `${(t1 - t0).toFixed(1)} ms`;
 
@@ -173,6 +212,8 @@ export default function Home() {
     const medicoes: number[] = [];
     let ultimoResultado: Registro[] = [];
 
+    const memoriaAntes = obterMemoriaHeap();
+
     for (let i = 0; i < 100; i++) {
       const copiaTeste = [...dadosMestre];
       const t0 = performance.now();
@@ -180,6 +221,9 @@ export default function Home() {
       const t1 = performance.now();
       medicoes.push(t1 - t0);
     }
+
+    const memoriaDepois = obterMemoriaHeap();
+    medirMemoria(memoriaAntes, memoriaDepois);
 
     const ordenadas = [...medicoes].sort((a, b) => a - b);
     const media = medicoes.reduce((acc, val) => acc + val, 0) / medicoes.length;
@@ -256,58 +300,61 @@ export default function Home() {
     setLabelGrafico("");
     setEstatisticas(estatisticasInicial);
     isFirstRender.current = true;
+    setMemoryHeap("0.0 KB");
+    setMemoryHeapPeak("0.0 KB");
   };
 
   return (
     <div className="bg-[#F9FAFB] pb-5 min-h-screen">
-      <div className="bg-[#222222] text-[#ffffff] pt-2 mb-6 p-3">
-        <p className="text-[18px] font-semibold">Data Structure Benchmark — MVP</p>
-        <p className="text-sm">ambiente de teste • Next.js | TypeScript</p>
-      </div>
+      <Header />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 px-3 md:px-5">
-        <div>
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-5 px-3 md:px-5">
+        <div className="lg:col-span-3 bg-white border-none rounded-xl shadow-sm p-5 border border-zinc-100">
+          <div className="flex flex-row items-center gap-3 pb-4 mb-4 border-b border-gray-50">
+            <div className="p-2 bg-gray-50 rounded-lg">
+              <Settings size={20} className="text-gray-600"/>
+            </div>
+            <h2 className="font-bold text-zinc-800 leading-tight">Configuração de Ambiente</h2>
+          </div>
           <div>
-            <p className="border-b-[1.5px] border-zinc-200 mb-3">Estrutura de dados:</p>
+            <p className="text-sm border-b-[1.5px] border-zinc-200 mb-3">Estrutura de dados:</p>
             <div className="flex flex-row flex-wrap gap-2">
               {estruturas.map((item) => (
                 <Button key={item} nome={item} selecionado={estrutura === item} onClick={() => setEstrutura(item)} />
               ))}
             </div>
           </div>
-
           <div className="pt-4">
-            <p className="border-b-[1.5px] border-zinc-200 mb-3">Volume de dados:</p>
+            <p className="text-sm border-b-[1.5px] border-zinc-200 mb-3">Volume de dados:</p>
             <div className="flex flex-row flex-wrap gap-2">
               {volumes.map((item) => (
                 <Button key={item} nome={item} selecionado={volume === item} onClick={() => setVolume(item)} />
               ))}
             </div>
           </div>
-
           <div className="pt-4">
-            <p className="border-b-[1.5px] border-zinc-200 mb-3">Operações:</p>
+            <p className="text-sm border-b-[1.5px] border-zinc-200 mb-3">Operações:</p>
             <div className="flex flex-row flex-wrap gap-2">
               {operacoes.map((item) => (
                 <Button key={item} nome={item} selecionado={operacao === item} onClick={() => setOperacao(item)} />
               ))}
               <button
                 onClick={executarBenchmark}
-                className="w-[120px] h-[40px] bg-[#00BC7D] text-white flex flex-row items-center justify-center gap-2 border border-none rounded-md cursor-pointer p-1 ml-auto"
+                className="w-30 h-10 bg-[#00BC7D] text-white flex text-sm flex-row items-center justify-center gap-2 border border-none rounded-md cursor-pointer p-1 ml-auto"
               >
                 <Play size={16} />
                 Executar
               </button>
               <button
                 onClick={executarTestes}
-                className="w-[140px] h-[40px] bg-[#6366F1] text-white flex flex-row items-center justify-center gap-2 border border-none rounded-md cursor-pointer p-1"
+                className="w-35 h-10 bg-[#6366F1] text-white text-sm flex flex-row items-center justify-center gap-2 border border-none rounded-md cursor-pointer p-1"
               >
                 <FlaskConical size={16} />
                 Benchmark
               </button>
               <button
                 onClick={zerarAmbiente}
-                className="w-[120px] h-[40px] bg-[#FC959A] text-white flex flex-row items-center justify-center gap-2 border border-none rounded-md cursor-pointer p-1"
+                className="w-30 h-10 bg-[#FC959A] text-white text-sm flex flex-row items-center justify-center gap-2 border border-none rounded-md cursor-pointer p-1"
               >
                 <RotateCcw size={16} />
                 Zerar
@@ -321,94 +368,24 @@ export default function Home() {
                   onChange={(e) => setTermoBusca(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && executarBenchmark()}
                   placeholder={operacao === "Busca" ? "Digite o idx para buscar..." : "Digite a categoria para filtragem..."}
-                  className="w-full max-w-[290px] text-sm border border-zinc-300 rounded-md px-3 py-2 mt-4"
+                  className="w-full max-w-72.5 text-sm border border-zinc-300 rounded-md px-3 py-2 mt-4"
                 />
               )}
             </div>
           </div>
         </div>
 
-        <div className="bg-[#ffffff] border-none rounded-xl shadow-sm p-5">
-          <div className="flex flex-row items-center gap-3 pb-4 mb-4 border-b border-cyan-50">
-            <div className="p-2 bg-indigo-50 rounded-lg">
-              <Layers size={20} className="text-cyan-600"/>
-            </div>
-            <p className="font-bold text-zinc-800 leading-tight">Métricas – Última Execução</p>
-          </div>
-          <div className="flex flex-row flex-wrap gap-2">
-            <div className="bg-zinc-50 flex-1 min-w-[140px] h-[150px] border border-[2px] border-[#E5E7EB] rounded-md p-1">
-              <p className="text-sm text-zinc-500">tempo de resposta:</p>
-              <p className="text-lg text-zinc-700 font-bold break-all">{tempoDeResposta}</p>
-            </div>
-            <div className="bg-zinc-50 flex-1 min-w-[140px] h-[150px] border border-[2px] border-[#E5E7EB] rounded-md p-1">
-              <p className="text-sm text-zinc-500">tempo de renderização:</p>
-              <p className="text-lg text-zinc-700 font-bold break-all">{tempoRenderizacao}</p>
-            </div>
-            <div className="bg-zinc-50 flex-1 min-w-[140px] h-[150px] border border-[2px] border-[#E5E7EB] rounded-md p-1">
-              <p className="text-sm text-zinc-500">taxa de quadros FPS:</p>
-              <p className="text-lg text-zinc-700 font-bold">{fps} fps</p>
-            </div>
-          </div>
-        </div>
+        <Metricas 
+          tempoDeResposta={tempoDeResposta}
+          tempoDeRenderizacao={tempoRenderizacao}
+          fps={fps}
+        />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-6 gap-5 pt-10 px-3 md:px-5">
-        <ListaResultado 
-          resultados={resultados} 
-          totalResultados={totalResultados} 
-        />
-        <Historico 
-          historico={historico}
-        />
-        <div className="lg:col-span-2 bg-white border-none rounded-xl shadow-sm p-5 border border-zinc-100">
-          {/* Cabeçalho com ícone e título */}
-          <div className="flex flex-row items-center gap-3 pb-4 mb-4 border-b border-zinc-50">
-            <div className="p-2 bg-indigo-50 rounded-lg">
-              <SquarePercent size={20} className="text-indigo-600" />
-            </div>
-            <div>
-              <p className="font-bold text-zinc-800 leading-tight">Análise de Percentis</p>
-            </div>
-          </div>
-
-          {/* Lista de métricas */}
-          <div className="space-y-3">
-            {/* P99 - Destaque por ser o cenário crítico */}
-            <div className="flex items-center justify-between p-3 rounded-lg bg-indigo-50/50 border border-indigo-100/50">
-              <div className="flex flex-col">
-                <span className="font-bold text-[#6366F1]">P99</span>
-              </div>
-              <p className="text-lg font-bold text-[#6366F1] tracking-tight">
-                {estatisticas.p99}
-              </p>
-            </div>
-
-            {/* P95 */}
-            <div className="flex items-center justify-between p-3 rounded-lg bg-zinc-50 border border-zinc-100">
-              <div className="flex flex-col">
-                <span className="font-bold text-zinc-600">P95</span>
-              </div>
-              <p className="text-base font-semibold text-zinc-800">
-                {estatisticas.p95}
-              </p>
-            </div>
-
-            {/* P90 */}
-            <div className="flex items-center justify-between p-3 rounded-lg bg-zinc-50 border border-zinc-100">
-              <div className="flex flex-col">
-                <span className="font-bold text-zinc-600">P90</span>
-              </div>
-              <p className="text-base font-semibold text-zinc-800">
-                {estatisticas.p90}
-              </p>
-            </div>
-          </div>
-
-          {/* Nota de rodapé explicativa */}
-          <p className="text-[10px] text-zinc-400 mt-4 leading-relaxed italic">
-            * Indica que X% das execuções foram concluídas dentro deste tempo.
-          </p>
-        </div>
+      <div className="grid grid-cols-1 lg:grid-cols-6 gap-5 pt-5 px-3 md:px-5">
+        <ListaResultado resultados={resultados} totalResultados={totalResultados} />
+        <Historico historico={historico} />
+        <AnalisePercentis estatisticas={estatisticas} />
       </div>
 
       {dadosGrafico.length > 0 && (
@@ -418,6 +395,23 @@ export default function Home() {
             label={labelGrafico} 
             estatisticas={estatisticas} 
           />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-5">
+            <div className="bg-white p-4 rounded-xl shadow-sm border-none">
+              <p className="text-sm text-zinc-500">Heap utilizado</p>
+              <div className="flex items-center gap-2 mt-2">
+                <MemoryStick size={18} />
+                <p className="font-bold">{memoryHeap}</p>
+              </div>
+            </div>
+            <div className="bg-white p-4 rounded-xl shadow-sm border-none">
+              <p className="text-sm text-zinc-500">Heap total/pico</p>
+              <div className="flex items-center gap-2 mt-2">
+                <MemoryStick size={18} />
+                <p className="font-bold">{memoryHeapPeak}</p>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>

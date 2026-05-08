@@ -2,6 +2,7 @@ import { Registro } from "../generateData";
 import { benchmarkArray } from "./array";
 import { benchmarkArvoreAvl } from "./arvoreAvl";
 import { benchmarkArvoreBinaria } from "./arvoreBinaria";
+import { benchmarkHashmap } from "./hashmap";
 import { benchmarkMap } from "./map";
 import { benchmarkSet } from "./set";
 
@@ -11,6 +12,7 @@ export function executar(estrutura: string, operacao: string, dados: Registro[],
   if (estrutura === "Árvore Binária") return benchmarkArvoreBinaria(operacao, dados, termo);
   if (estrutura === "Set") return benchmarkSet(operacao, dados, termo);
   if (estrutura === "Árvore AVL") return benchmarkArvoreAvl(operacao, dados, termo);
+  if (estrutura === "Hashmap") return benchmarkHashmap(operacao, dados, termo);
 
   return [];
 }
