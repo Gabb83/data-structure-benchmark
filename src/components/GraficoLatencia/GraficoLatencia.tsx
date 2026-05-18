@@ -1,5 +1,5 @@
 import { ChartNoAxesCombined } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceLine, Label } from "recharts";
 
 type DadoGrafico = {
   execucao: string;
@@ -21,6 +21,10 @@ type Props = {
 };
 
 export default function GraficoLatencia({ dados, estatisticas, label }: Props) {
+
+  const mediaNum = parseFloat(estatisticas.media);
+  const desvioNum = parseFloat(estatisticas.desvio);
+
   return (
     <div className="bg-[#ffffff] border-none rounded-xl shadow-sm p-4">
       <div className="flex flex-row flex-wrap items-center gap-3 pb-4 border-b border-zinc-100">
@@ -40,9 +44,56 @@ export default function GraficoLatencia({ dados, estatisticas, label }: Props) {
               formatter={(value: any) => [`${value} ms`, "latência"]}
               contentStyle={{ fontSize: 12, borderRadius: 6 }}
             />
+            <ReferenceLine 
+              y={mediaNum} 
+              stroke="#6D28D9" 
+              strokeDasharray="10 5" 
+              strokeWidth={0.6}
+            >
+              <Label 
+                value="Média" 
+                position="insideTopRight" 
+                fill="#6D28D9" 
+                fontSize={9} 
+              />
+            </ReferenceLine>
+            <ReferenceLine 
+              y={mediaNum + desvioNum} 
+              stroke="#EF4444" 
+              strokeDasharray="10 5" 
+              strokeOpacity={0.6}
+            >
+              <Label 
+                value="+1 Desvio" 
+                position="insideTopRight" 
+                fill="#EF4444" 
+                fontSize={9} 
+              />
+            </ReferenceLine>
+            <ReferenceLine 
+              y={mediaNum - desvioNum} 
+              stroke="#EF4444" 
+              strokeDasharray="10 5" 
+              strokeOpacity={0.6}
+            >
+              <Label 
+                value="-1 Desvio" 
+                position="insideTopRight" 
+                fill="#EF4444" 
+                fontSize={9} 
+              />
+            </ReferenceLine>
             <Bar dataKey="latencia" fill="#00BC7D" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
+        <div className="mt-2 text-[10px] text-zinc-400 flex justify-end gap-4">
+          <span className="flex items-center gap-1">
+            <span className="w-2 h-0.5 bg-violet-600 border-dashed border-t"></span> Média: {estatisticas.media}ms
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="w-2 h-0.5 bg-red-400 border-dashed border-t"></span> Estabilidade: ±{estatisticas.desvio}ms
+          </span>
+        </div>
       </div>
       <div className="flex flex-row flex-wrap gap-2">
         <div className="bg-zinc-50 flex-1 min-w-30 border-2 border-[#E5E7EB] rounded-md p-2">

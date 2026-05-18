@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { Play, RotateCcw, FlaskConical, SquarePercent, Layers, Settings, MemoryStick } from "lucide-react";
+import { Play, RotateCcw, FlaskConical, Settings, MemoryStick } from "lucide-react";
 import Button from "@/src/components/Button";
 import { geracaoDeDados, Registro } from "@/src/utils/generateData";
 import { executar } from "@/src/utils/benchmarks";
